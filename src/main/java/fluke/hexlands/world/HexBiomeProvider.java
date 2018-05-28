@@ -108,65 +108,7 @@ public class HexBiomeProvider extends BiomeProvider
             throw new ReportedException(crashreport);
         }
     }
-
-    /**
-     * Gets biomes to use for the blocks and loads the other data like temperature and humidity onto the
-     * WorldChunkManager.
-     */
-    /*
-    public Biome[] getBiomes(@Nullable Biome[] oldBiomeList, int chunkX, int chunkZ, int width, int depth)
-    {
-        if (oldBiomeList == null || oldBiomeList.length < width * depth)
-        {
-            oldBiomeList = new Biome[width * depth];
-        }
-
-        
-        /*I have no idea why this doesnt work
-        for (int x=0; x<width; x++)
-        {
-        	int realX = chunkX + x;
-        	for (int z=0; z<depth; z++)
-        	{
-        		int realZ = chunkZ + z;
-        		Hex hexy = hex_layout.pixelToHex(new Point(realX, realZ)).hexRound();
-        		if ((hexy.q + hexy.r)%2 == 0)
-            	{
-        			oldBiomeList[(x*width)+z] = this.biome;
-            	}
-            	else
-            	{
-            		oldBiomeList[(x*width)+z] = Biomes.OCEAN;
-            	}
-        	}
-        }
-        ****
-        for (int i=0; i<width*depth; i++)
-        {
-        	int realX = (i%width)+chunkX;
-        	int realZ = (int)(i/depth)+chunkZ;
-        	Hex hexy = hex_layout.pixelToHex(new Point(realX, realZ)).hexRound();
-        	if ((hexy.q + hexy.r)%2 == 0)
-        	{
-    			//oldBiomeList[i] = this.biome;
-        		oldBiomeList[i] = this.biome;
-        	}
-        	else
-        	{
-        		oldBiomeList[i] = Biomes.OCEAN;
-        	}
-        }
-
-        return oldBiomeList;
-    }
-
-    /**
-     * Gets a list of biomes for the specified blocks.
-     *
-    public Biome[] getBiomes(@Nullable Biome[] listToReuse, int x, int z, int width, int length, boolean cacheFlag)
-    {
-        return this.getBiomes(listToReuse, x, z, width, length);
-    }*/
+    
     /**
      * Gets biomes to use for the blocks and loads the other data like temperature and humidity onto the
      * WorldChunkManager.

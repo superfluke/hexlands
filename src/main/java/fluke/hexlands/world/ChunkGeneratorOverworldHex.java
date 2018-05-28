@@ -10,8 +10,6 @@ import fluke.hexlands.util.hex.Layout;
 import fluke.hexlands.util.hex.Point;
 import fluke.hexlands.util.hex.TestEdge;
 
-//import com.bloodnbonesgaming.dimensionalcontrol.util.noise.OpenSimplexNoiseGeneratorOctaves;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFalling;
 import net.minecraft.block.state.IBlockState;
@@ -46,8 +44,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     Biome[] biomesForGeneration;
     protected static final IBlockState WATER = Blocks.WATER.getDefaultState();
     protected static final IBlockState STONE = Blocks.STONE.getDefaultState();
-    //protected final OpenSimplexNoiseGeneratorOctaves terrainNoise;
-    //protected final SimplexNoise simnoise;
+    
     public static final int HEX_X_SIZE = Configs.hexWidth;
     public static final int HEX_Z_SIZE = Configs.hexHeight;
     public static final int SEA_LEVEL = 60;
@@ -113,8 +110,6 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     public void replaceBiomeBlocks(int x, int z, ChunkPrimer primer, Biome[] biomesIn)
     {
         if (!net.minecraftforge.event.ForgeEventFactory.onReplaceBiomeBlocks(this, x, z, primer, this.world)) return;
-        double d0 = 0.03125D;
-        //this.depthBuffer = this.surfaceNoise.getRegion(this.depthBuffer, (double)(x * 16), (double)(z * 16), 16, 16, 0.0625D, 0.0625D, 1.0D);
 
         for (int i = 0; i < 16; ++i)
         {
@@ -137,7 +132,8 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
             for (int z = 0; z < 16; z++)
             {
                 final int realZ = z + chunkZ * 16;
-                //convert x,z to a hex
+                
+                //convert x,z to a hex cords (q,r)
                 Hex hexy = hex_layout.pixelToHex(new Point(realX, realZ)).hexRound();
                 
                 //convert hex cords back to x,z to get center point
@@ -145,21 +141,18 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
 
                 boolean isEdgeBlock = TestEdge.isEdge(new Point(realX, realZ), center_pt, hexy, HEX_X_SIZE, HEX_Z_SIZE);
                 boolean isHardEdge = false;
-                boolean isBeachEdge = false;
+                //boolean isBeachEdge = false;
                 
                 Biome this_biome = this.world.getBiomeProvider().getBiome(new BlockPos(realX, 90, realZ));
                 boolean isWet = this_biome == Biomes.OCEAN || this_biome == Biomes.DEEP_OCEAN;
-                boolean isBeach = this_biome == Biomes.BEACH || this_biome == Biomes.STONE_BEACH;
+                //boolean isBeach = this_biome == Biomes.BEACH || this_biome == Biomes.STONE_BEACH;
                 
-                
-                //get noise at hex cords
-                //double hex_noise = SimplexNoise.noise(hexy.q, hexy.r);
                 double hex_noise = SimplexNoise.noise(center_pt.getX()/60, center_pt.getZ()/60);
                 
                 float biomeBaseHeight = this_biome.getBaseHeight();
                 float biomeVariation = this_biome.getHeightVariation();
-                float bVar = biomeVariation * 0.6F + 0.1F;
-                float bBas = (biomeBaseHeight * 16.0F - 2.0F) / 8.0F;
+                biomeVariation = biomeVariation * 0.6F + 0.1F;
+                biomeBaseHeight = (biomeBaseHeight * 16.0F - 2.0F) / 8.0F;
                 
                 double noise = SimplexNoise.noise(realX, realZ, 100, 100, 0.5, 6);
                 double noiser = SimplexNoise.noise(realX, realZ, 40, 40, 0.5, 2);
@@ -170,13 +163,11 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 //figure out if we need to draw a line between 2 hexes
                 if(!isWet && !Configs.outlineAll)
             	{
-	                //int direction = -1;
 	                if (isEdgeBlock)
 	                {	                	
 	                	//this is sumdum shit, if anyone sees this... i'm sorry
 	                	//figure out what direction to check for biome matching
 	                	//south east edge = 0 and increases going counter-clockwise around the hex
-	                	
 	                	ArrayList<Integer> directions_to_test = new ArrayList<Integer>();
 	                	
 	                	if (realX - center_pt.getX() > 0)
@@ -310,22 +301,12 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
 		                		*/
 		                		
 		                	}
-
-		                	
-		                	/*
-		                	for (int y = 42; y <= height; y++)
-		                    {
-		                    	primer.setBlockState(x, y, z, edge);
-		                    }
-		                    */
 	                	}
-	
 	                }
             	}
-                //int height = (int) (60 + 2 * bBas + (50 * noise)*(bVar));
+
                 //adjust height by noise
-                //int height = (int)(60 + 14*(hex_noise+this_biome.getBaseHeight()));
-                int hex_height = (int)(Configs.terrainBaseline + 3 * bBas);// + 3*hex_noise);
+                int hex_height = (int)(Configs.terrainBaseline + 3 * biomeBaseHeight);// + 3*hex_noise);
                 int block_height = hex_height;
                 
                 if(isWet)
@@ -352,16 +333,16 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 	if (distance_ratio > 0.85)
                 		distance_ratio = 0.85;
                 	//int block_desired_height = (int)(hex_height + 5*block_noise + 32*this_biome.getHeightVariation()*block_noiser);
-                	int block_desired_height = (int) (block_height + (58 * noise)*(bVar));
+                	int block_desired_height = (int) (block_height + (58 * noise)*(biomeVariation));
                 	
                 	//smooth out where the terrain wants to be with the height of the hex rim based on distance from center of hex
                 	block_height = (int)(block_desired_height*(1-distance_ratio) + hex_height*distance_ratio);
-                	//System.out.printf("%d %d\n", block_desired_height, block_height);
-                	
+                	/*
                 	if(isBeachEdge)
                 	{
                 		block_height = (int)((block_height + SEA_LEVEL) / 2)-1;
                 	}
+                	*/
                 }
 
                 if(block_height>255)
@@ -385,24 +366,12 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 {
                 	primer.setBlockState(x, block_height, z, STONE);
                 }
-                
 
-               
-                /*
-                int dist_to_center = (int)Math.sqrt(Math.pow(realX - center_pt.getX(), 2) + Math.pow(realZ - center_pt.getZ(), 2));
-                System.out.printf("x, z: %d, %d, center x, z: %d, %d, distance: %d\n", realX, realZ, center_pt.getX(), center_pt.getZ(), dist_to_center);
-                if (dist_to_center == 17)
-                {
-                	primer.setBlockState(x, height+1, z, Blocks.STONE.getDefaultState());
-                }
-                */
-                
             	
-            	if(realX == center_pt.getX() && realZ == center_pt.getZ()) //delete me
+            	if(realX == center_pt.getX() && realZ == center_pt.getZ()) //delete me, adds nether rack to hex midpoint for testing
             		primer.setBlockState(x, block_height+1, z, rim2);
             	
             	if(Configs.outlineAll || isHardEdge)
-            	//if(isHardEdge)
             	{
             		if (isEdgeBlock)
             			primer.setBlockState(x, block_height+1, z, rim);
