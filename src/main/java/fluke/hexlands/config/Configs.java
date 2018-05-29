@@ -9,7 +9,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 public class Configs {
 	
 	public static Configuration config;
-	public static int hexWidth, hexHeight, biomeSize, terrainHeight, terrainBaseline, lakeRarity;
+	public static int hexWidth, hexHeight, biomeSize, terrainHeight, terrainBaseline, lakeRarity, seaLevel, biomeHeightAdjustment, extraHexNoise;
 	public static boolean outlineAll, generateStructures, generateCaves;
 	public static String rimBlock;
 	public static final String WORLD_CONFIG = "worldgen";
@@ -49,13 +49,25 @@ public class Configs {
         prop.setComment("generate caves and ravines (Default: true)");
         generateCaves = prop.getBoolean();
         
-        prop = c.get(WORLD_CONFIG, "terrainBaseline", 68);
-        prop.setComment("height (y-level) terrain is before adjustments (Default: 68)");
+        prop = c.get(WORLD_CONFIG, "terrainBaseline", 84);
+        prop.setComment("height (y-level) terrain is before adjustments (Default: 84)");
         terrainBaseline = prop.getInt();
         
-        prop = c.get(WORLD_CONFIG, "terrainHeight", 16);
-        prop.setComment("height (y-level) terrain is adjusted by (Default: 16)");
+        prop = c.get(WORLD_CONFIG, "terrainHeight", 60);
+        prop.setComment("height (y-level) terrain is adjusted by (Default: 60)");
         terrainHeight = prop.getInt();
+        
+        prop = c.get(WORLD_CONFIG, "biomeHeightAdjustment", 18);
+        prop.setComment("how much biomes influence the final height of the hex (Default: 18)");
+        biomeHeightAdjustment = prop.getInt();
+        
+        prop = c.get(WORLD_CONFIG, "extraHexNoise", 0);
+        prop.setComment("extra height (y-level) to adjust each hex by, best used with outlineAll setting (Default: 0)");
+        extraHexNoise = prop.getInt();
+        
+        prop = c.get(WORLD_CONFIG, "seaLevel", 60);
+        prop.setComment("height (y-level) of oceans (Default: 60)");
+        seaLevel = prop.getInt();
         
         prop = c.get(WORLD_CONFIG, "lakeRarity", 5);
         prop.setComment("how often lakes generate, lower numbers = more lakes (Default: 5)");

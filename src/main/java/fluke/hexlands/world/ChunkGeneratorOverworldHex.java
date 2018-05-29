@@ -47,7 +47,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     
     public static final int HEX_X_SIZE = Configs.hexWidth;
     public static final int HEX_Z_SIZE = Configs.hexHeight;
-    public static final int SEA_LEVEL = 60;
+    public static final int SEA_LEVEL = Configs.seaLevel;
     protected Layout hex_layout = new Layout(Layout.flat, new Point(HEX_X_SIZE, HEX_Z_SIZE), new Point(0, 0));
 
     private MapGenBase caveGenerator = new MapGenCaves();
@@ -123,7 +123,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     
     public void generateTerrain(final int chunkX, final int chunkZ, final ChunkPrimer primer)
     {
-        
+    	float lastBaseHight = 0.01F;
         //System.out.printf("chunk x, z: %d, %d = %d, %d\n", chunkX, chunkZ, chunkX*16, chunkZ*16);
         for (int x = 0; x < 16; x++)
         {
@@ -149,15 +149,36 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 
                 double hex_noise = SimplexNoise.noise(center_pt.getX()/60, center_pt.getZ()/60);
                 
-                float biomeBaseHeight = this_biome.getBaseHeight();
+                float biomeBaseHeightRaw = this_biome.getBaseHeight();
                 float biomeVariation = this_biome.getHeightVariation();
                 biomeVariation = biomeVariation * 0.6F + 0.1F;
-                biomeBaseHeight = (biomeBaseHeight * 16.0F - 2.0F) / 8.0F;
+                float biomeBaseHeight = (biomeBaseHeightRaw * 16.0F - 1.0F) / 36.0F; //forces range -2 to 2 into -1 to 1
+                biomeBaseHeight = biomeBaseHeight/2 + 0.5F; // into range 0 to 1
+               
+                if(biomeBaseHeight < 0.5)//ease in
+                	biomeBaseHeight = 16*biomeBaseHeight*biomeBaseHeight*biomeBaseHeight*biomeBaseHeight*biomeBaseHeight;
+                else //ease out
+                	biomeBaseHeight = 1+16*(--biomeBaseHeight)*biomeBaseHeight*biomeBaseHeight*biomeBaseHeight*biomeBaseHeight ;
                 
-                double noise = SimplexNoise.noise(realX, realZ, 100, 100, 0.5, 6);
-                double noiser = SimplexNoise.noise(realX, realZ, 40, 40, 0.5, 2);
-                double noisyist = SimplexNoise.noise(realX, realZ, 20, 20, 0.5, 2);
-                noise += noiser*0.9 + noisyist * 0.6;
+                biomeBaseHeight = biomeBaseHeight * 2 - 0.95F; //back into range -1 to 1
+                biomeBaseHeight = (float) Math.pow(Math.abs(biomeBaseHeight), (1-biomeBaseHeight)*(1-biomeBaseHeight));//push values near 0 higher without messing with extreme values too much
+            	if (biomeBaseHeightRaw < 0)
+            		biomeBaseHeight *= -1;
+                
+                /*one day ill learn how to debug like a real man... not today
+                if (lastBaseHight != biomeBaseHeight)
+                {
+	                System.out.printf("biome: %s, preb: %f, postb: %f\n", this_biome.getBiomeName(), biomeBaseHeightRaw, biomeBaseHeight);
+                }
+                lastBaseHight = biomeBaseHeight;
+                */
+                
+                //int fourstepX = realX - realX % 4;
+                //int fourstepZ = realZ - realZ % 4;
+                double noise = SimplexNoise.noise(realX, realZ, 160, 160, 0.5, 6);
+                double noiser = SimplexNoise.noise(realX, realZ, 80, 80, 0.5, 2);
+                double noisyist = SimplexNoise.noise(realX, realZ, 40, 40, 0.5, 2);
+                noise += noiser*0.8 + noisyist * 0.4 + 0.1;
                 noise *= Math.abs(noise+0.5)*0.8;
                 
                 //figure out if we need to draw a line between 2 hexes
@@ -306,7 +327,8 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
             	}
 
                 //adjust height by noise
-                int hex_height = (int)(Configs.terrainBaseline + 3 * biomeBaseHeight);// + 3*hex_noise);
+                int hex_height = (int)(Configs.terrainBaseline + Configs.biomeHeightAdjustment * biomeBaseHeight + Configs.extraHexNoise
+                		*hex_noise);
                 int block_height = hex_height;
                 
                 if(isWet)
@@ -333,7 +355,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 	if (distance_ratio > 0.85)
                 		distance_ratio = 0.85;
                 	//int block_desired_height = (int)(hex_height + 5*block_noise + 32*this_biome.getHeightVariation()*block_noiser);
-                	int block_desired_height = (int) (block_height + (58 * noise)*(biomeVariation));
+                	int block_desired_height = (int) (block_height + (Configs.terrainHeight * noise)*(biomeVariation));
                 	
                 	//smooth out where the terrain wants to be with the height of the hex rim based on distance from center of hex
                 	block_height = (int)(block_desired_height*(1-distance_ratio) + hex_height*distance_ratio);
@@ -421,22 +443,22 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
 	        }
         }
 
-        if (!villageHere)
+        if (!villageHere && this.rand.nextInt(80 / 10) == 0)
         {
-	        if (net.minecraftforge.event.terraingen.TerrainGen.populate(this, this.world, this.rand, x, z, villageHere, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.LAVA))
-	        {
-	            int i2 = this.rand.nextInt(16) + 8;
-	            int l2 = this.rand.nextInt(this.rand.nextInt(248) + 8);
-	            int k3 = this.rand.nextInt(16) + 8;
-	
-	            if (l2 < this.world.getSeaLevel())
-	            {
-	                (new WorldGenLakes(Blocks.LAVA)).generate(this.world, this.rand, blockpos.add(i2, l2, k3));
-	            }
-	        }
+            if (net.minecraftforge.event.terraingen.TerrainGen.populate(this, this.world, this.rand, x, z, villageHere, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.LAVA))
+            {
+                int i2 = this.rand.nextInt(16) + 8;
+                int l2 = this.rand.nextInt(this.rand.nextInt(248) + 8);
+                int k3 = this.rand.nextInt(16) + 8;
+
+                if (l2 < this.world.getSeaLevel() || this.rand.nextInt(80 / 8) == 0)
+                {
+                    (new WorldGenLakes(Blocks.LAVA)).generate(this.world, this.rand, blockpos.add(i2, l2, k3));
+                }
+            }
         }
 
-        
+
         if (net.minecraftforge.event.terraingen.TerrainGen.populate(this, this.world, this.rand, x, z, villageHere, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.DUNGEON))
         {
             for (int j2 = 0; j2 < 8; ++j2)
@@ -483,35 +505,115 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     @Override
     public boolean generateStructures(Chunk chunkIn, int x, int z)
     {
-        // TODO Auto-generated method stub
-        return false;
+    	boolean flag = false;
+
+        if (Configs.generateStructures && chunkIn.getInhabitedTime() < 3600L)
+        {
+            flag |= this.oceanMonumentGenerator.generateStructure(this.world, this.rand, new ChunkPos(x, z));
+        }
+
+        return flag;
     }
 
     @Override
     public List<SpawnListEntry> getPossibleCreatures(EnumCreatureType creatureType, BlockPos pos)
     {
-        // TODO Auto-generated method stub
-        return null;
+    	Biome biome = this.world.getBiome(pos);
+
+        if (Configs.generateStructures)
+        {
+            if (creatureType == EnumCreatureType.MONSTER && this.scatteredFeatureGenerator.isSwampHut(pos))
+            {
+                return this.scatteredFeatureGenerator.getMonsters();
+            }
+
+            if (creatureType == EnumCreatureType.MONSTER && this.oceanMonumentGenerator.isPositionInStructure(this.world, pos))
+            {
+                return this.oceanMonumentGenerator.getMonsters();
+            }
+        }
+
+        return biome.getSpawnableList(creatureType);
     }
 
     @Override
     public BlockPos getNearestStructurePos(World worldIn, String structureName, BlockPos position, boolean findUnexplored)
     {
-        // TODO Auto-generated method stub
-        return null;
+    	if (!Configs.generateStructures)
+        {
+            return null;
+        }
+        else if ("Stronghold".equals(structureName) && this.strongholdGenerator != null)
+        {
+            return this.strongholdGenerator.getNearestStructurePos(worldIn, position, findUnexplored);
+        }
+        //else if ("Mansion".equals(structureName) && this.woodlandMansionGenerator != null)
+        //{
+            //return this.woodlandMansionGenerator.getNearestStructurePos(worldIn, position, findUnexplored);
+        //}
+        else if ("Monument".equals(structureName) && this.oceanMonumentGenerator != null)
+        {
+            return this.oceanMonumentGenerator.getNearestStructurePos(worldIn, position, findUnexplored);
+        }
+        else if ("Village".equals(structureName) && this.villageGenerator != null)
+        {
+            return this.villageGenerator.getNearestStructurePos(worldIn, position, findUnexplored);
+        }
+        else if ("Mineshaft".equals(structureName) && this.mineshaftGenerator != null)
+        {
+            return this.mineshaftGenerator.getNearestStructurePos(worldIn, position, findUnexplored);
+        }
+        else
+        {
+            return "Temple".equals(structureName) && this.scatteredFeatureGenerator != null ? this.scatteredFeatureGenerator.getNearestStructurePos(worldIn, position, findUnexplored) : null;
+        }
     }
 
     @Override
     public void recreateStructures(Chunk chunkIn, int x, int z)
     {
-        // TODO Auto-generated method stub
+    	if (Configs.generateStructures)
+        {
+        	this.mineshaftGenerator.generate(this.world, x, z, (ChunkPrimer)null);
+        	this.villageGenerator.generate(this.world, x, z, (ChunkPrimer)null);
+        	this.strongholdGenerator.generate(this.world, x, z, (ChunkPrimer)null);
+        	this.scatteredFeatureGenerator.generate(this.world, x, z, (ChunkPrimer)null);
+        	this.oceanMonumentGenerator.generate(this.world, x, z, (ChunkPrimer)null);
+        	//this.woodlandMansionGenerator.generate(this.world, x, z, (ChunkPrimer)null);
+        }
         
     }
 
     @Override
     public boolean isInsideStructure(World worldIn, String structureName, BlockPos pos)
     {
-        // TODO Auto-generated method stub
-        return false;
+        if (!Configs.generateStructures)
+        {
+            return false;
+        }
+        else if ("Stronghold".equals(structureName) && this.strongholdGenerator != null)
+        {
+            return this.strongholdGenerator.isInsideStructure(pos);
+        }
+        //else if ("Mansion".equals(structureName) && this.woodlandMansionGenerator != null)
+        //{
+            //return this.woodlandMansionGenerator.isInsideStructure(pos);
+        //}
+        else if ("Monument".equals(structureName) && this.oceanMonumentGenerator != null)
+        {
+            return this.oceanMonumentGenerator.isInsideStructure(pos);
+        }
+        else if ("Village".equals(structureName) && this.villageGenerator != null)
+        {
+            return this.villageGenerator.isInsideStructure(pos);
+        }
+        else if ("Mineshaft".equals(structureName) && this.mineshaftGenerator != null)
+        {
+            return this.mineshaftGenerator.isInsideStructure(pos);
+        }
+        else
+        {
+            return "Temple".equals(structureName) && this.scatteredFeatureGenerator != null ? this.scatteredFeatureGenerator.isInsideStructure(pos) : false;
+        }
     }
 }

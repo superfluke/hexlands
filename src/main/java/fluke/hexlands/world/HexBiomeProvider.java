@@ -58,7 +58,12 @@ public class HexBiomeProvider extends BiomeProvider
 
     public Biome getBiome(BlockPos pos, Biome defaultBiome)
     {
-        return this.biomeCache.getBiome(pos.getX(), pos.getZ(), defaultBiome);
+    	//convert x,z to a hex cords (q,r)
+        Hex hexy = hex_layout.pixelToHex(new Point(pos.getX(), pos.getZ())).hexRound();
+        
+        //convert hex cords back to x,z to get center point
+        Point center_pt =  hex_layout.hexToPixel(hexy);
+        return this.biomeCache.getBiome(center_pt.getX(), center_pt.getZ(), defaultBiome);
     }
 
     /**
