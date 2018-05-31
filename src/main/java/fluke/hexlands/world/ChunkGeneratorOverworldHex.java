@@ -55,9 +55,10 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     private MapGenVillage villageGenerator = new MapGenVillage();
     private MapGenMineshaft mineshaftGenerator = new MapGenMineshaft();
     private MapGenScatteredFeature scatteredFeatureGenerator = new MapGenScatteredFeature();
-    private MapGenBase ravineGenerator = new MapGenRavine();
+    //private MapGenBase ravineGenerator = new MapGenRavine();
+    private MapGenBase ravineGenerator = new HexGenRavine();
     private StructureOceanMonument oceanMonumentGenerator = new StructureOceanMonument();
-    public IBlockState rim = Block.getBlockFromName(Configs.rimBlock).getDefaultState();
+    public static final IBlockState RIM = Block.getBlockFromName(Configs.rimBlock).getDefaultState();
     //private WoodlandMansion woodlandMansionGenerator = new WoodlandMansion(this);
     public IBlockState rim2 = Block.getBlockFromName("minecraft:netherrack").getDefaultState();
     
@@ -162,7 +163,8 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 
                 biomeBaseHeight = biomeBaseHeight * 2 - 0.95F; //back into range -1 to 1
                 biomeBaseHeight = (float) Math.pow(Math.abs(biomeBaseHeight), (1-biomeBaseHeight)*(1-biomeBaseHeight));//push values near 0 higher without messing with extreme values too much
-            	if (biomeBaseHeightRaw < 0)
+            	
+                if (biomeBaseHeightRaw < 0) //put negative values back in their place after that last adjustment
             		biomeBaseHeight *= -1;
                 
                 /*one day ill learn how to debug like a real man... not today
@@ -396,7 +398,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
             	if(Configs.outlineAll || isHardEdge)
             	{
             		if (isEdgeBlock)
-            			primer.setBlockState(x, block_height+1, z, rim);
+            			primer.setBlockState(x, block_height+1, z, RIM);
             	}
             	
              

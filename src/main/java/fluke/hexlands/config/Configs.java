@@ -2,6 +2,9 @@ package fluke.hexlands.config;
 
 import java.io.File;
 
+import fluke.hexlands.world.ChunkGeneratorOverworldHex;
+
+import net.minecraft.init.Blocks;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -81,3 +84,4 @@ public class Configs {
 	}
 
 }
+
