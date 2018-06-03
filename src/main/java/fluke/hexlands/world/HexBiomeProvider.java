@@ -24,8 +24,7 @@ import net.minecraft.world.storage.WorldInfo;
 
 public class HexBiomeProvider extends BiomeProvider
 {
-    /** The biome generator object. */
-    private final Biome biome;
+
     protected Layout hex_layout = new Layout(Layout.flat, new Point(ChunkGeneratorOverworldHex.HEX_X_SIZE, ChunkGeneratorOverworldHex.HEX_Z_SIZE), new Point(0, 0));
     
     private GenLayer genBiomes;
@@ -35,10 +34,10 @@ public class HexBiomeProvider extends BiomeProvider
     private final BiomeCache biomeCache;
     public static final int BIOME_SIZE = Configs.biomeSize;
     
-    public HexBiomeProvider(long seed, WorldType worldTypeIn, Biome biomeIn)
+    public HexBiomeProvider(long seed, WorldType worldTypeIn)
     {
     	this.biomeCache = new BiomeCache(this);
-        this.biome = biomeIn;
+        //this.biome = biomeIn;
         
         GenLayer[] agenlayer = GenLayer.initializeAllBiomeGenerators(seed, worldTypeIn, null);
         agenlayer = getModdedBiomeGenerators(worldTypeIn, seed, agenlayer);
@@ -46,9 +45,9 @@ public class HexBiomeProvider extends BiomeProvider
         this.biomeIndexLayer = agenlayer[1];
     }
     
-    public HexBiomeProvider(WorldInfo info, Biome biomeIn)
+    public HexBiomeProvider(WorldInfo info)
     {
-    	this(info.getSeed(), info.getTerrainType(), biomeIn);
+    	this(info.getSeed(), info.getTerrainType());
     }
 
     public Biome getBiome(BlockPos pos)
@@ -171,24 +170,86 @@ public class HexBiomeProvider extends BiomeProvider
     @Nullable
     public BlockPos findBiomePosition(int x, int z, int range, List<Biome> biomes, Random random)
     {
-        return biomes.contains(this.biome) ? new BlockPos(x - range + random.nextInt(range * 2 + 1), 0, z - range + random.nextInt(range * 2 + 1)) : null;
+        IntCache.resetIntCache();
+        int xStart = x - range >> 2;
+        int zStart = z - range >> 2;
+        int xEnd = x + range >> 2;
+        int zEnd = z + range >> 2;
+        int xRange = xEnd - xStart + 1;
+        int zRange = zEnd - zStart + 1;
+        
+        //int[] aint = this.genBiomes.getInts(xStart, zStart, xRange, zRange);
+        Biome[] biomeList = getBiomes(null, xStart, zStart, xRange, zRange);
+
+        BlockPos blockpos = null;
+        int k1 = 0;
+
+        for (int l1 = 0; l1 < xRange * zRange; ++l1)
+        {
+            int i2 = xStart + l1 % xRange << 2;
+            int j2 = zStart + l1 / xRange << 2;
+            Biome biome = biomeList[l1];
+
+            if (biomes.contains(biome) && (blockpos == null || random.nextInt(k1 + 1) == 0))
+            {
+                blockpos = new BlockPos(i2, 0, j2);
+                ++k1;
+            }
+        }
+
+        return blockpos;
     }
 
     /**
      * checks given Chunk's Biomes against List of allowed ones
      */
-    public boolean areBiomesViable(int x, int z, int radius, List<Biome> allowed)
+    public boolean areBiomesViable(int x, int z, int range, List<Biome> allowed)
     {
-        return allowed.contains(this.biome);
+    	IntCache.resetIntCache();
+        int xStart = x - range >> 2;
+        int zStart = z - range >> 2;
+        int xEnd = x + range >> 2;
+        int zEnd = z + range >> 2;
+        int xRange = xEnd - xStart + 1;
+        int zRange = zEnd - zStart + 1;
+        
+        //int[] aint = this.genBiomes.getInts(xStart, zStart, xRange, zRange);
+        Biome[] biomeList = getBiomes(null, xStart, zStart, xRange, zRange);
+
+        try
+        {
+            for (int k1 = 0; k1 < xRange * zRange; ++k1)
+            {
+                Biome biome = biomeList[k1];
+
+                if (!allowed.contains(biome))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        catch (Throwable throwable)
+        {
+            CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Invalid Biome id");
+            CrashReportCategory crashreportcategory = crashreport.makeCategory("Layer");
+            crashreportcategory.addCrashSection("Layer", this.genBiomes.toString());
+            crashreportcategory.addCrashSection("x", Integer.valueOf(x));
+            crashreportcategory.addCrashSection("z", Integer.valueOf(z));
+            crashreportcategory.addCrashSection("radius", Integer.valueOf(range));
+            crashreportcategory.addCrashSection("allowed", allowed);
+            throw new ReportedException(crashreport);
+        }
     }
 
     public boolean isFixedBiome()
     {
-        return true;
+        return false;
     }
 
     public Biome getFixedBiome()
     {
-        return this.biome;
+        return null;
     }
 }

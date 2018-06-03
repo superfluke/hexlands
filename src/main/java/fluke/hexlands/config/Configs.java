@@ -72,8 +72,8 @@ public class Configs {
         prop.setComment("height (y-level) of oceans (Default: 60)");
         seaLevel = prop.getInt();
         
-        prop = c.get(WORLD_CONFIG, "lakeRarity", 5);
-        prop.setComment("how often lakes generate, lower numbers = more lakes (Default: 5)");
+        prop = c.get(WORLD_CONFIG, "lakeRarity", 6);
+        prop.setComment("how often lakes generate, lower numbers = more lakes (Default: 6)");
         lakeRarity = prop.getInt();
         
         prop = c.get(WORLD_CONFIG, "rimBlock", "minecraft:stonebrick");

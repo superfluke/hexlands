@@ -62,6 +62,9 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     //private WoodlandMansion woodlandMansionGenerator = new WoodlandMansion(this);
     public IBlockState rim2 = Block.getBlockFromName("minecraft:netherrack").getDefaultState();
     
+    public double[] heightmap;
+    public Biome[] biomemap;
+    
     public ChunkGeneratorOverworldHex(final World world)
     {
     	{
@@ -74,7 +77,11 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
             oceanMonumentGenerator = (StructureOceanMonument)net.minecraftforge.event.terraingen.TerrainGen.getModdedMapGen(oceanMonumentGenerator, net.minecraftforge.event.terraingen.InitMapGenEvent.EventType.OCEAN_MONUMENT);
             //woodlandMansionGenerator = (WoodlandMansion)net.minecraftforge.event.terraingen.TerrainGen.getModdedMapGen(woodlandMansionGenerator, net.minecraftforge.event.terraingen.InitMapGenEvent.EventType.WOODLAND_MANSION);
         }
+    	
         this.world = world;
+        heightmap = new double[256];
+        biomemap = new Biome[256];
+        
         //terrainNoise = new OpenSimplexNoiseGeneratorOctaves(world.getSeed());
         //simnoise = new SimplexNoise();
     }
@@ -124,8 +131,9 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     
     public void generateTerrain(final int chunkX, final int chunkZ, final ChunkPrimer primer)
     {
-    	float lastBaseHight = 0.01F;
-        //System.out.printf("chunk x, z: %d, %d = %d, %d\n", chunkX, chunkZ, chunkX*16, chunkZ*16);
+    	this.generateBiomemap(chunkX*16, chunkZ*16);
+    	this.generateHeightmap(chunkX*16, chunkZ*16);
+    	
         for (int x = 0; x < 16; x++)
         {
             final int realX = x + chunkX * 16;
@@ -144,7 +152,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 boolean isHardEdge = false;
                 //boolean isBeachEdge = false;
                 
-                Biome this_biome = this.world.getBiomeProvider().getBiome(new BlockPos(realX, 90, realZ));
+                Biome this_biome = this.biomemap[x + z * 16];
                 boolean isWet = this_biome == Biomes.OCEAN || this_biome == Biomes.DEEP_OCEAN;
                 //boolean isBeach = this_biome == Biomes.BEACH || this_biome == Biomes.STONE_BEACH;
                 
@@ -175,13 +183,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 lastBaseHight = biomeBaseHeight;
                 */
                 
-                //int fourstepX = realX - realX % 4;
-                //int fourstepZ = realZ - realZ % 4;
-                double noise = SimplexNoise.noise(realX, realZ, 160, 160, 0.5, 6);
-                double noiser = SimplexNoise.noise(realX, realZ, 80, 80, 0.5, 2);
-                double noisyist = SimplexNoise.noise(realX, realZ, 40, 40, 0.5, 2);
-                noise += noiser*0.8 + noisyist * 0.4 + 0.1;
-                noise *= Math.abs(noise+0.5)*0.8;
+                
                 
                 //figure out if we need to draw a line between 2 hexes
                 if(!isWet && !Configs.outlineAll)
@@ -339,6 +341,10 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 	block_height = hex_height;
                 	//block_height += (int)((50 * noise)*(bVar));
                 }
+                else if(this_biome == Biomes.MESA_CLEAR_ROCK)
+                {
+                	this.heightmap[x + z * 16] = Math.round(this.heightmap[x + z * 16] * 16 * 10)/10;
+                }
                 /*
                 else if(isBeach)
                 {
@@ -357,7 +363,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 	if (distance_ratio > 0.85)
                 		distance_ratio = 0.85;
                 	//int block_desired_height = (int)(hex_height + 5*block_noise + 32*this_biome.getHeightVariation()*block_noiser);
-                	int block_desired_height = (int) (block_height + (Configs.terrainHeight * noise)*(biomeVariation));
+                	int block_desired_height = (int) (block_height + (Configs.terrainHeight * this.heightmap[x + z * 16])*(biomeVariation));
                 	
                 	//smooth out where the terrain wants to be with the height of the hex rim based on distance from center of hex
                 	block_height = (int)(block_desired_height*(1-distance_ratio) + hex_height*distance_ratio);
@@ -391,10 +397,11 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 	primer.setBlockState(x, block_height, z, STONE);
                 }
 
-            	
+            	/*
             	if(realX == center_pt.getX() && realZ == center_pt.getZ()) //delete me, adds nether rack to hex midpoint for testing
             		primer.setBlockState(x, block_height+1, z, rim2);
-            	
+            	*/
+                
             	if(Configs.outlineAll || isHardEdge)
             	{
             		if (isEdgeBlock)
@@ -404,6 +411,35 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
              
             }
         }
+    }
+    
+    private void generateBiomemap(int startX, int startZ) 
+    {
+		for(int x=0; x<16; x++)
+		{
+			for(int z=0; z<16; z++)
+			{
+				this.biomemap[x + z * 16] = this.world.getBiomeProvider().getBiome(new BlockPos(startX+x, 0, startZ+z));
+			}
+		}
+		
+	}
+
+	public void generateHeightmap (int startX, int startZ)
+    {
+		for(int x=0; x<16; x++)
+		{
+			for(int z=0; z<16; z++)
+			{
+				double noise = SimplexNoise.noise(startX+x, startZ+z, 190, 190, 0.5, 2);
+		        double noiser = SimplexNoise.noise(startX+x, startZ+z, 90, 90, 0.5, 4);
+		        double noisyist = SimplexNoise.noise(startX+x, startZ+z, 40, 40, 0.5, 4);
+		        noise += noiser*0.8 + noisyist * 0.4 + 0.1;
+		        noise *= Math.abs(noise+0.5)*0.8;
+		        
+		        this.heightmap[x + z * 16] = noise;
+			}
+		}
     }
 
     @Override
@@ -418,9 +454,9 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
         long k = this.rand.nextLong() / 2L * 2L + 1L;
         long l = this.rand.nextLong() / 2L * 2L + 1L;
         this.rand.setSeed((long)x * k + (long)z * l ^ this.world.getSeed());
-        boolean villageHere = false;
+        boolean villageHere = false; 
         ChunkPos chunkpos = new ChunkPos(x, z);
-
+        
         net.minecraftforge.event.ForgeEventFactory.onChunkPopulate(true, this, this.world, this.rand, x, z, villageHere);
         
         
