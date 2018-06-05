@@ -12,7 +12,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 public class Configs {
 	
 	public static Configuration config;
-	public static int hexWidth, hexHeight, biomeSize, terrainHeight, terrainBaseline, lakeRarity, seaLevel, biomeHeightAdjustment, extraHexNoise;
+	public static int hexSize, biomeSize, terrainHeight, terrainBaseline, lakeRarity, seaLevel, biomeHeightAdjustment, extraHexNoise;
 	public static boolean outlineAll, generateStructures, generateCaves;
 	public static String rimBlock;
 	public static final String WORLD_CONFIG = "worldgen";
@@ -28,13 +28,15 @@ public class Configs {
 	{
 		Property prop;
 		
-		prop = c.get(WORLD_CONFIG, "hexWidth", 36);
-        prop.setComment("width (x-axis) of hex tiles (Default: 36)");
-        hexWidth = prop.getInt();
+		prop = c.get(WORLD_CONFIG, "hexSize", 36);
+        prop.setComment("controls size of hex tiles, larger number = bigger hex (Default: 36)");
+        hexSize = prop.getInt();
         
+        /*
         prop = c.get(WORLD_CONFIG, "hexHeight", 36);
         prop.setComment("height (z-axis) of hex tiles (Default: 36)");
         hexHeight = prop.getInt();
+        */
         
         prop = c.get(WORLD_CONFIG, "biomeSize", 600);
         prop.setComment("size of biomes, lower values = larger biomes (Default: 600)");
@@ -52,12 +54,12 @@ public class Configs {
         prop.setComment("generate caves and ravines (Default: true)");
         generateCaves = prop.getBoolean();
         
-        prop = c.get(WORLD_CONFIG, "terrainBaseline", 84);
-        prop.setComment("height (y-level) terrain is before adjustments (Default: 84)");
+        prop = c.get(WORLD_CONFIG, "terrainBaseline", 66);
+        prop.setComment("height (y-level) terrain is before adjustments (Default: 66)");
         terrainBaseline = prop.getInt();
         
-        prop = c.get(WORLD_CONFIG, "terrainHeight", 60);
-        prop.setComment("height (y-level) terrain is adjusted by (Default: 60)");
+        prop = c.get(WORLD_CONFIG, "terrainHeight", 78);
+        prop.setComment("height (y-level) terrain is adjusted by (Default: 78)");
         terrainHeight = prop.getInt();
         
         prop = c.get(WORLD_CONFIG, "biomeHeightAdjustment", 18);

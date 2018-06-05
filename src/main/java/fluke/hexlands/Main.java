@@ -35,7 +35,7 @@ public class Main
 	public static void init(FMLInitializationEvent event)
 	{
 		worldTypeFluke = new WorldTypeFluke();
-		aTest = new WorldTypeATest();
+		//aTest = new WorldTypeATest();
 	}
 	
 	@EventHandler

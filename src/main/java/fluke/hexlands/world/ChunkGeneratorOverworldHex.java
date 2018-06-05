@@ -45,8 +45,8 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     protected static final IBlockState WATER = Blocks.WATER.getDefaultState();
     protected static final IBlockState STONE = Blocks.STONE.getDefaultState();
     
-    public static final int HEX_X_SIZE = Configs.hexWidth;
-    public static final int HEX_Z_SIZE = Configs.hexHeight;
+    public static final int HEX_X_SIZE = Configs.hexSize;
+    public static final int HEX_Z_SIZE = Configs.hexSize;
     public static final int SEA_LEVEL = Configs.seaLevel;
     protected Layout hex_layout = new Layout(Layout.flat, new Point(HEX_X_SIZE, HEX_Z_SIZE), new Point(0, 0));
 
@@ -79,6 +79,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
         }
     	
         this.world = world;
+        world.setSeaLevel(Configs.seaLevel);
         heightmap = new double[256];
         biomemap = new Biome[256];
         
@@ -337,7 +338,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 
                 if(isWet)
                 {
-                	hex_height -= 26;
+                	hex_height -= 6;
                 	block_height = hex_height;
                 	//block_height += (int)((50 * noise)*(bVar));
                 }
@@ -353,6 +354,11 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 }
                 */
                 
+                if(Configs.outlineAll)
+                {
+                	isHardEdge = isEdgeBlock;
+                }
+                
                 if(!isHardEdge)
                 {
                 	//get distance to center point of hex, though this whole thing assumes equal width and height
@@ -360,8 +366,8 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 	int zdif = realZ - center_pt.getZ();
                 	double distance_from_origin = Math.sqrt(xdif*xdif+zdif*zdif);
                 	double distance_ratio = distance_from_origin/HEX_X_SIZE;
-                	if (distance_ratio > 0.85)
-                		distance_ratio = 0.85;
+                	if (distance_ratio > 0.9)
+                		distance_ratio = 0.9;
                 	//int block_desired_height = (int)(hex_height + 5*block_noise + 32*this_biome.getHeightVariation()*block_noiser);
                 	int block_desired_height = (int) (block_height + (Configs.terrainHeight * this.heightmap[x + z * 16])*(biomeVariation));
                 	
@@ -433,8 +439,8 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
 			{
 				double noise = SimplexNoise.noise(startX+x, startZ+z, 190, 190, 0.5, 2);
 		        double noiser = SimplexNoise.noise(startX+x, startZ+z, 90, 90, 0.5, 4);
-		        double noisyist = SimplexNoise.noise(startX+x, startZ+z, 40, 40, 0.5, 4);
-		        noise += noiser*0.8 + noisyist * 0.4 + 0.1;
+		        double noisyist = SimplexNoise.noise(startX+x, startZ+z, 50, 50, 0.5, 4);
+		        noise += noiser*0.8 + noisyist * 0.25 + 0.1;
 		        noise *= Math.abs(noise+0.5)*0.8;
 		        
 		        this.heightmap[x + z * 16] = noise;
