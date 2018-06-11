@@ -13,7 +13,7 @@ public class Configs {
 	
 	public static Configuration config;
 	public static int hexSize, biomeSize, terrainHeight, terrainBaseline, lakeRarity, seaLevel, biomeHeightAdjustment, extraHexNoise;
-	public static boolean outlineAll, generateStructures, generateCaves;
+	public static boolean outlineAll, generateStructures, generateCaves, borderToBedrock;
 	public static String rimBlock;
 	public static final String WORLD_CONFIG = "worldgen";
 
@@ -81,6 +81,10 @@ public class Configs {
         prop = c.get(WORLD_CONFIG, "rimBlock", "minecraft:stonebrick");
         prop.setComment("what block to use for dividing the grid (Default: minecraft:stonebrick)");
         rimBlock = prop.getString();
+		
+		prop = c.get(WORLD_CONFIG, "borderToBedrock", false);
+        prop.setComment("generate border block down to bedrock rather than just at the surface (Default: false)");
+        borderToBedrock = prop.getBoolean();
         
         c.save();
 	}

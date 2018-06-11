@@ -13,7 +13,7 @@ import fluke.hexlands.util.Reference;
 import fluke.hexlands.world.WorldTypeATest;
 import fluke.hexlands.world.WorldTypeFluke;
 
-@Mod(modid = Reference.MOD_ID, name = Reference.NAME, version = Reference.VERSION)
+@Mod(modid = Reference.MOD_ID, name = Reference.NAME, version = Reference.VERSION, acceptableRemoteVersions="*")
 public class Main 
 {
 	public static WorldTypeFluke worldTypeFluke;

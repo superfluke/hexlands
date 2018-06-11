@@ -389,7 +389,10 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 //set everything under height to stone
                 for (int y = 0; y < block_height; y++)
                 {
-                	primer.setBlockState(x, y, z, STONE);
+					if(Configs.borderToBedrock && isHardEdge)
+						primer.setBlockState(x, y, z, RIM);
+					else
+						primer.setBlockState(x, y, z, STONE);
                 }
                 
                 if (block_height < 60)
@@ -400,7 +403,10 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 }
                 else
                 {
-                	primer.setBlockState(x, block_height, z, STONE);
+					if(Configs.borderToBedrock && isHardEdge)
+						primer.setBlockState(x, block_height, z, RIM);
+					else
+						primer.setBlockState(x, block_height, z, STONE);
                 }
 
             	/*
