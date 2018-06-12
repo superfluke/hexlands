@@ -25,14 +25,13 @@ import net.minecraft.world.storage.WorldInfo;
 public class HexBiomeProvider extends BiomeProvider
 {
 
-    protected Layout hex_layout = new Layout(Layout.flat, new Point(ChunkGeneratorOverworldHex.HEX_X_SIZE, ChunkGeneratorOverworldHex.HEX_Z_SIZE), new Point(0, 0));
+    protected Layout hex_layout = new Layout(Layout.flat, new Point(Configs.worldgen.hexSize, Configs.worldgen.hexSize), new Point(0, 0));
     
     private GenLayer genBiomes;
     /** A GenLayer containing the indices into BiomeGenBase.biomeList[] */
     private GenLayer biomeIndexLayer;
     /** The biome list. */
     private final BiomeCache biomeCache;
-    public static final int BIOME_SIZE = Configs.biomeSize;
     
     public HexBiomeProvider(long seed, WorldType worldTypeIn)
     {
@@ -91,7 +90,7 @@ public class HexBiomeProvider extends BiomeProvider
             	
             	if (hexy.q != prev_hex.q || hexy.r != prev_hex.r)
             	{
-            		prev_biome = Biome.getBiome(this.biomeIndexLayer.getInts(hexy.q*BIOME_SIZE, hexy.r*BIOME_SIZE, 1, 1)[0], Biomes.DEFAULT);
+            		prev_biome = Biome.getBiome(this.biomeIndexLayer.getInts(hexy.q*Configs.worldgen.biomeSize, hexy.r*Configs.worldgen.biomeSize, 1, 1)[0], Biomes.DEFAULT);
             		prev_hex = hexy;
             	}
             	
