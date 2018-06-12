@@ -155,7 +155,7 @@ public class HexBiomeProvider extends BiomeProvider
             	//if this hex has different cords from the last hex
             	if (hexy.q != prev_hex.q || hexy.r != prev_hex.r)
             	{	//get a new biome based on current hex cords
-            		prev_biome = Biome.getBiome(this.biomeIndexLayer.getInts(hexy.q*600, hexy.r*600, 1, 1)[0], Biomes.DEFAULT);
+            		prev_biome = Biome.getBiome(this.biomeIndexLayer.getInts(hexy.q*Configs.worldgen.biomeSize, hexy.r*Configs.worldgen.biomeSize, 1, 1)[0], Biomes.DEFAULT);
             		prev_hex = hexy;
             	}
             	

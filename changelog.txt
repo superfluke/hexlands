@@ -1,0 +1,19 @@
+1.2
+----------
+Mod configs now show in options menu (thanks TehNut)
+Rim blocks can now use meta data with the @ symbol
+	minecraft:concrete@6
+Fixed biomeSize config option sometimes being ignored
+Biomeblacklist?
+
+
+1.1
+----------
+Can be run on server without client having mod installed. When run on a dedicated server, edit the server.properties to:
+	level-type=hexlands
+Added border to bedrock config
+
+
+1.0
+----------
+Made a thing
