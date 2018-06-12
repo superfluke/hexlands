@@ -53,7 +53,7 @@ public class Configs {
 		@Config.RequiresWorldRestart
 		public boolean borderToBedrock = false;
 
-		@Config.Comment({"What block to use for dividing the grid", "Default: minecraft:stonebrick"})
+		@Config.Comment({"What block to use for dividing the grid, use @ for metadata", "Example: minecraft:concrete@6", "Default: minecraft:stonebrick"})
 		public String rimBlock = "minecraft:stonebrick";
 	}
 

@@ -10,6 +10,7 @@ import fluke.hexlands.proxy.CommonProxy;
 import fluke.hexlands.util.Reference;
 import fluke.hexlands.world.WorldTypeATest;
 import fluke.hexlands.world.WorldTypeFluke;
+import fluke.hexlands.world.biomeEditor;
 
 @Mod(modid = Reference.MOD_ID, name = Reference.NAME, version = Reference.VERSION, acceptableRemoteVersions="*")
 public class Main 
@@ -33,7 +34,7 @@ public class Main
 	@EventHandler
 	public static void PostInit(FMLPostInitializationEvent event)
 	{
-		
+		biomeEditor.removeBlacklistBiomes();
 	}
 	
 }

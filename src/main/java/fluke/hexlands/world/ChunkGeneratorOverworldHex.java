@@ -669,7 +669,15 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     }
 
     public void updateRimBlock() {
-        // TODO - The config should probably be state aware
-         rimBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Configs.worldgen.rimBlock)).getDefaultState();
+    	String rimblock = Configs.worldgen.rimBlock;
+    	if(rimblock.indexOf("@") > 0)
+    	{
+    		String[] metarim = rimblock.split("@");
+    		rimBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(metarim[0])).getStateFromMeta(Integer.parseInt(metarim[1]));
+    	}
+    	else
+    	{
+    		rimBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Configs.worldgen.rimBlock)).getDefaultState();
+    	}
     }
 }
