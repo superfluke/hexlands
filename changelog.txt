@@ -4,7 +4,10 @@ Mod configs now show in options menu (thanks TehNut)
 Rim blocks can now use meta data with the @ symbol
 	minecraft:concrete@6
 Fixed biomeSize config option sometimes being ignored
-Biomeblacklist?
+Added config option to generate Hex dimension
+    Note: this option is meant for pack makers. There is no way to travel to this dim unless added
+Added config option to force Hex generation in the overworld, even when Hex Lands world type is not selected
+Added more config options to better control of which vanilla structures to generate 
 
 
 1.1

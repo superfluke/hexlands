@@ -13,6 +13,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class Configs {
 
 	public static ConfigWorldGen worldgen = new ConfigWorldGen();
+	public static ConfigDimension dimension = new ConfigDimension();
 
 	public static class ConfigWorldGen {
 		@Config.Comment({"Controls size of hex tiles. Larger number = Bigger hex", "Default: 36"})
@@ -39,22 +40,69 @@ public class Configs {
 		@Config.Comment({"Extra height (y-level) to adjust each hex by, best used with outlineAll setting", "Default: 0"})
 		@Config.RequiresWorldRestart
 		public int extraHexNoise = 0;
+		@Config.Comment({"How many attempts per chunk to generate dungeons. Higher numbers = More dungeons", "Default: 8"})
+		@Config.RequiresWorldRestart
+		public int dungeonCount = 8;
 
 		@Config.Comment({"Draw borders around every hex", "Default: false"})
 		@Config.RequiresWorldRestart
 		public boolean outlineAll = false;
-		@Config.Comment({"Generate vanilla structures: mineshaft, village, stronghold, temples, etc", "Default: true"})
+		@Config.Comment({"Master command for generating all vanilla structures: mineshaft, village, stronghold, temples, etc", "Default: true"})
 		@Config.RequiresWorldRestart
 		public boolean generateStructures = true;
-		@Config.Comment({"Generate caves and ravines", "Default: true"})
+		@Config.Comment({"Generate mineshaft"})
+		@Config.RequiresWorldRestart
+		public boolean generateMineshaft = true;
+		@Config.Comment({"Generate temples"})
+		@Config.RequiresWorldRestart
+		public boolean generateTemples = true;
+		@Config.Comment({"Generate villages"})
+		@Config.RequiresWorldRestart
+		public boolean generateVillage = true;
+		@Config.Comment({"Generate stronghold"})
+		@Config.RequiresWorldRestart
+		public boolean generateStronghold = true;
+		@Config.Comment({"Generate ocean monuments"})
+		@Config.RequiresWorldRestart
+		public boolean generateMonuments = true;
+		@Config.Comment({"Generate caves", "Default: true"})
 		@Config.RequiresWorldRestart
 		public boolean generateCaves = true;
+		@Config.Comment({"Generate ravines", "Default: true"})
+		@Config.RequiresWorldRestart
+		public boolean generateRavines = true;
 		@Config.Comment({"Generate border block down to bedrock rather than just at the surface", "Default: false"})
 		@Config.RequiresWorldRestart
 		public boolean borderToBedrock = false;
+		@Config.Comment({"Should water lakes generate", "Default: true"})
+		@Config.RequiresWorldRestart
+		public boolean lakesGenerate = true;
+		@Config.Comment({"Should rare lava lakes generate on the surface", "Default: true"})
+		@Config.RequiresWorldRestart
+		public boolean lavaLakesGenerate = true;
 
+		@Config.RequiresWorldRestart
 		@Config.Comment({"What block to use for dividing the grid, use @ for metadata", "Example: minecraft:concrete@6", "Default: minecraft:stonebrick"})
 		public String rimBlock = "minecraft:stonebrick";
+		//TODO figure out why this doesnt work
+//		@Config.Comment({"Biomes black listed from generating (no ocean plains)", "Example: minecraft:forest", "Default:"})
+//		@Config.RequiresWorldRestart
+//		public String[] biomeBlacklist = {};
+	}
+	
+	public static class ConfigDimension 
+	{
+		@Config.Comment({"Generate new dimension with hex-land generation", "Note: no method exists to travel to this dimension and must be added by the pack maker", "Default: false"})
+		@Config.RequiresWorldRestart
+		public boolean generateDim = false;
+		
+		@Config.Comment({"What dimension ID to use", "Default: 88"})
+		@Config.RequiresWorldRestart
+		public int dimID = 88;
+		
+		@Config.Comment({"Force overworld hex generation even when world type is not selected", "Default: false"})
+		@Config.RequiresWorldRestart
+		public boolean forceHexGen = false;
 	}
 
 	@SubscribeEvent

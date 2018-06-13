@@ -37,6 +37,7 @@ import net.minecraft.world.gen.structure.MapGenStronghold;
 import net.minecraft.world.gen.structure.MapGenVillage;
 import net.minecraft.world.gen.structure.StructureOceanMonument;
 import net.minecraft.world.gen.structure.WoodlandMansion;
+import net.minecraftforge.fml.client.config.ConfigGuiType;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 public class ChunkGeneratorOverworldHex implements IChunkGenerator
@@ -102,7 +103,10 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
         if(Configs.worldgen.generateCaves)
         {
 	        this.caveGenerator.generate(this.world, x, z, chunkprimer);
-	        this.ravineGenerator.generate(this.world, x, z, chunkprimer);
+        }
+        if(Configs.worldgen.generateRavines)
+        {
+        	this.ravineGenerator.generate(this.world, x, z, chunkprimer);
         }
 
         Chunk chunk = new Chunk(this.world, chunkprimer, x, z);
@@ -474,16 +478,21 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
         
         
         if (Configs.worldgen.generateStructures)
-        {
-        	this.mineshaftGenerator.generateStructure(this.world, this.rand, chunkpos);
-        	villageHere = this.villageGenerator.generateStructure(this.world, this.rand, chunkpos);
-        	this.strongholdGenerator.generateStructure(this.world, this.rand, chunkpos);
-        	this.scatteredFeatureGenerator.generateStructure(this.world, this.rand, chunkpos);
-        	this.oceanMonumentGenerator.generateStructure(this.world, this.rand, chunkpos);
+        {	
+        	if (Configs.worldgen.generateMineshaft)
+        		this.mineshaftGenerator.generateStructure(this.world, this.rand, chunkpos);
+        	if (Configs.worldgen.generateVillage)
+        		villageHere = this.villageGenerator.generateStructure(this.world, this.rand, chunkpos);
+        	if (Configs.worldgen.generateStronghold)
+        		this.strongholdGenerator.generateStructure(this.world, this.rand, chunkpos);
+        	if (Configs.worldgen.generateTemples)
+        		this.scatteredFeatureGenerator.generateStructure(this.world, this.rand, chunkpos);
+        	if (Configs.worldgen.generateMonuments)
+        		this.oceanMonumentGenerator.generateStructure(this.world, this.rand, chunkpos);
         	//this.woodlandMansionGenerator.generateStructure(this.world, this.rand, chunkpos);
         }
 
-        if (biome != Biomes.DESERT && biome != Biomes.DESERT_HILLS && !villageHere && this.rand.nextInt(Configs.worldgen.lakeRarity) == 0)
+        if (Configs.worldgen.lakesGenerate && biome != Biomes.DESERT && biome != Biomes.DESERT_HILLS && !villageHere && this.rand.nextInt(Configs.worldgen.lakeRarity) == 0)
         {
 	        if (net.minecraftforge.event.terraingen.TerrainGen.populate(this, this.world, this.rand, x, z, villageHere, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.LAKE))
 	        {
@@ -502,7 +511,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 int l2 = this.rand.nextInt(this.rand.nextInt(248) + 8);
                 int k3 = this.rand.nextInt(16) + 8;
 
-                if (l2 < this.world.getSeaLevel() || this.rand.nextInt(80 / 8) == 0)
+                if (l2 < this.world.getSeaLevel() || (this.rand.nextInt(80 / 8) == 0 && Configs.worldgen.lavaLakesGenerate))
                 {
                     (new WorldGenLakes(Blocks.LAVA)).generate(this.world, this.rand, blockpos.add(i2, l2, k3));
                 }
@@ -512,7 +521,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
 
         if (net.minecraftforge.event.terraingen.TerrainGen.populate(this, this.world, this.rand, x, z, villageHere, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.DUNGEON))
         {
-            for (int j2 = 0; j2 < 8; ++j2)
+            for (int j2 = 0; j2 < Configs.worldgen.dungeonCount; ++j2)
             {
                 int i3 = this.rand.nextInt(16) + 8;
                 int l3 = this.rand.nextInt(256);
@@ -625,11 +634,16 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     {
     	if (Configs.worldgen.generateStructures)
         {
-        	this.mineshaftGenerator.generate(this.world, x, z, (ChunkPrimer)null);
-        	this.villageGenerator.generate(this.world, x, z, (ChunkPrimer)null);
-        	this.strongholdGenerator.generate(this.world, x, z, (ChunkPrimer)null);
-        	this.scatteredFeatureGenerator.generate(this.world, x, z, (ChunkPrimer)null);
-        	this.oceanMonumentGenerator.generate(this.world, x, z, (ChunkPrimer)null);
+    		if (Configs.worldgen.generateMineshaft)
+    			this.mineshaftGenerator.generate(this.world, x, z, (ChunkPrimer)null);
+    		if (Configs.worldgen.generateVillage)
+    			this.villageGenerator.generate(this.world, x, z, (ChunkPrimer)null);
+    		if (Configs.worldgen.generateStronghold)
+    			this.strongholdGenerator.generate(this.world, x, z, (ChunkPrimer)null);
+    		if (Configs.worldgen.generateTemples)
+    			this.scatteredFeatureGenerator.generate(this.world, x, z, (ChunkPrimer)null);
+    		if (Configs.worldgen.generateMonuments)
+    			this.oceanMonumentGenerator.generate(this.world, x, z, (ChunkPrimer)null);
         	//this.woodlandMansionGenerator.generate(this.world, x, z, (ChunkPrimer)null);
         }
         
