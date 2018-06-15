@@ -504,7 +504,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
             }
         }
 
-        //biome.decorate(this.world, this.rand, new BlockPos(i, 0, j)); TODO uncomment
+        biome.decorate(this.world, this.rand, new BlockPos(i, 0, j)); 
         if (net.minecraftforge.event.terraingen.TerrainGen.populate(this, this.world, this.rand, x, z, villageHere, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.ANIMALS))
         WorldEntitySpawner.performWorldGenSpawning(this.world, biome, i + 8, j + 8, 16, 16, this.rand);
         blockpos = blockpos.add(8, 0, 8);

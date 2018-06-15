@@ -3,7 +3,7 @@
   "modid": "hexlands",
   "name": "Hex Lands",
   "description": "Hex based terrain generation.",
-  "version": "1.3ish",
+  "version": "1.3ish2",
   "mcversion": "${mcversion}",
   "updateUrl": "",
   "authorList": ["super_fluke"],
