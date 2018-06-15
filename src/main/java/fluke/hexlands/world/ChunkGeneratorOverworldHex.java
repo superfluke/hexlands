@@ -157,11 +157,9 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
 
                 boolean isEdgeBlock = TestEdge.isEdge(new Point(realX, realZ), center_pt, hexy, Configs.worldgen.hexSize, Configs.worldgen.hexSize);
                 boolean isHardEdge = false;
-                //boolean isBeachEdge = false;
-                
+
                 Biome this_biome = this.biomemap[x + z * 16];
                 boolean isWet = this_biome == Biomes.OCEAN || this_biome == Biomes.DEEP_OCEAN;
-                //boolean isBeach = this_biome == Biomes.BEACH || this_biome == Biomes.STONE_BEACH;
                 
                 double hex_noise = SimplexNoise.noise(center_pt.getX()/60, center_pt.getZ()/60);
                 
@@ -318,20 +316,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
 		                	//if biomes don't match build a wall
 		                	if(this_biome != neighbor_biome)
 		                	{
-		                		isHardEdge = true;
-		                		
-		                		/*
-		                		if(isBeach)
-		                		{
-		                			boolean neighborIsWet = neighbor_biome == Biomes.DEEP_OCEAN || neighbor_biome == Biomes.OCEAN;
-		                			if (neighborIsWet)
-		                			{
-		                				isHardEdge = false;
-		                				isBeachEdge = true;
-		                			}
-		                		}
-		                		*/
-		                		
+		                		isHardEdge = true;		                		
 		                	}
 	                	}
 	                }
@@ -352,13 +337,6 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 {
                 	this.heightmap[x + z * 16] = Math.round(this.heightmap[x + z * 16] * 16 * 10)/10;
                 }
-                /*
-                else if(isBeach)
-                {
-                	hex_height = (int)((hex_height + SEA_LEVEL)/2);
-                	block_height = hex_height;
-                }
-                */
                 
                 if(Configs.worldgen.outlineAll)
                 {
@@ -374,17 +352,12 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 	double distance_ratio = distance_from_origin/Configs.worldgen.hexSize;
                 	if (distance_ratio > 0.9)
                 		distance_ratio = 0.9;
-                	//int block_desired_height = (int)(hex_height + 5*block_noise + 32*this_biome.getHeightVariation()*block_noiser);
-                	int block_desired_height = (int) (block_height + (Configs.worldgen.terrainHeight * this.heightmap[x + z * 16])*(biomeVariation));
+
+                	int block_desired_height = (int)Math.round((block_height + (Configs.worldgen.terrainHeight * this.heightmap[x + z * 16])*(biomeVariation)));
                 	
                 	//smooth out where the terrain wants to be with the height of the hex rim based on distance from center of hex
-                	block_height = (int)(block_desired_height*(1-distance_ratio) + hex_height*distance_ratio);
-                	/*
-                	if(isBeachEdge)
-                	{
-                		block_height = (int)((block_height + SEA_LEVEL) / 2)-1;
-                	}
-                	*/
+                	block_height = (int)Math.round((block_desired_height*(1-distance_ratio) + hex_height*distance_ratio));
+                
                 }
 
                 if(block_height>255)
@@ -531,7 +504,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
             }
         }
 
-        biome.decorate(this.world, this.rand, new BlockPos(i, 0, j));
+        //biome.decorate(this.world, this.rand, new BlockPos(i, 0, j)); TODO uncomment
         if (net.minecraftforge.event.terraingen.TerrainGen.populate(this, this.world, this.rand, x, z, villageHere, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.ANIMALS))
         WorldEntitySpawner.performWorldGenSpawning(this.world, biome, i + 8, j + 8, 16, 16, this.rand);
         blockpos = blockpos.add(8, 0, 8);
