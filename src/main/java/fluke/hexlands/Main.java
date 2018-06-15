@@ -11,6 +11,9 @@ import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import fluke.hexlands.command.DebugBiome;
+import fluke.hexlands.command.SomeOtherShittyDebugCommand;
 import fluke.hexlands.config.Configs;
 import fluke.hexlands.proxy.CommonProxy;
 import fluke.hexlands.util.Reference;
@@ -58,6 +61,13 @@ public class Main
 	public static void PostInit(FMLPostInitializationEvent event)
 	{
 		//BiomeEditor.removeBlacklistBiomes(); bleh TODO or something
+	}
+	
+	@EventHandler
+	public void startServer(FMLServerStartingEvent event) 
+	{
+		event.registerServerCommand(new DebugBiome());
+		event.registerServerCommand(new SomeOtherShittyDebugCommand());
 	}
 	
 }

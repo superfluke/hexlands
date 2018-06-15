@@ -139,7 +139,7 @@ public class HexBiomeProvider extends BiomeProvider
             System.arraycopy(abiome, 0, listToReuse, 0, width * length);
             return listToReuse;
         }
-        else
+        else //TODO am I assuming these are realX and realZ rather than chunk cords?
         {
             //int[] aint = this.biomeIndexLayer.getInts(x, z, width, length);
         	

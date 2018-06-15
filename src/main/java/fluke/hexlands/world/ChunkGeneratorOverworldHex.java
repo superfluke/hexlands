@@ -42,11 +42,12 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 public class ChunkGeneratorOverworldHex implements IChunkGenerator
 {
-    final Random rand = new Random();
+	private final Random rand;
     final World world;
     Biome[] biomesForGeneration;
     protected static final IBlockState WATER = Blocks.WATER.getDefaultState();
     protected static final IBlockState STONE = Blocks.STONE.getDefaultState();
+    
 
     protected Layout hex_layout = new Layout(Layout.flat, new Point(Configs.worldgen.hexSize, Configs.worldgen.hexSize), new Point(0, 0));
 
@@ -82,6 +83,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     	
         this.world = world;
         world.setSeaLevel(Configs.worldgen.seaLevel);
+        this.rand = new Random(world.getSeed());
         heightmap = new double[256];
         biomemap = new Biome[256];
         
@@ -92,7 +94,6 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     @Override
     public Chunk generateChunk(int x, int z)
     {
-    	
         this.rand.setSeed((long)x * 341873128712L + (long)z * 132897987541L);
         ChunkPrimer chunkprimer = new ChunkPrimer();
         
@@ -567,7 +568,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     {
     	boolean flag = false;
 
-        if (Configs.worldgen.generateStructures && chunkIn.getInhabitedTime() < 3600L)
+        if (Configs.worldgen.generateStructures && Configs.worldgen.generateMonuments && chunkIn.getInhabitedTime() < 3600L)
         {
             flag |= this.oceanMonumentGenerator.generateStructure(this.world, this.rand, new ChunkPos(x, z));
         }
@@ -587,7 +588,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 return this.scatteredFeatureGenerator.getMonsters();
             }
 
-            if (creatureType == EnumCreatureType.MONSTER && this.oceanMonumentGenerator.isPositionInStructure(this.world, pos))
+            if (creatureType == EnumCreatureType.MONSTER && Configs.worldgen.generateMonuments && this.oceanMonumentGenerator.isPositionInStructure(this.world, pos))
             {
                 return this.oceanMonumentGenerator.getMonsters();
             }
