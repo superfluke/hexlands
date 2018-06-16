@@ -3,6 +3,9 @@
 Fixed crop circles generating at center of hex
 Fixed land not flooding when below sea level
 Added config to adjust extra height ocean biomes are lowered by 
+Fixed vanilla structures not spawning
+Adjusted oceans height to be deep enough for monuments 
+Adjusted border height to not float above river/ocean biomes
 
 1.2
 ----------

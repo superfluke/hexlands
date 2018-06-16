@@ -109,6 +109,38 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
         {
         	this.ravineGenerator.generate(this.world, x, z, chunkprimer);
         }
+        if (Configs.worldgen.generateStructures)
+        {
+            if (Configs.worldgen.generateMineshaft)
+            {
+                this.mineshaftGenerator.generate(this.world, x, z, chunkprimer);
+            }
+
+            if (Configs.worldgen.generateVillage)
+            {
+                this.villageGenerator.generate(this.world, x, z, chunkprimer);
+            }
+
+            if (Configs.worldgen.generateStronghold)
+            {
+                this.strongholdGenerator.generate(this.world, x, z, chunkprimer);
+            }
+
+            if (Configs.worldgen.generateTemples)
+            {
+                this.scatteredFeatureGenerator.generate(this.world, x, z, chunkprimer);
+            }
+
+            if (Configs.worldgen.generateMonuments)
+            {
+                this.oceanMonumentGenerator.generate(this.world, x, z, chunkprimer);
+            }
+
+//            if (this.settings.useMansions)
+//            {
+//                this.woodlandMansionGenerator.generate(this.world, x, z, chunkprimer);
+//            }
+        }
 
         Chunk chunk = new Chunk(this.world, chunkprimer, x, z);
         byte[] abyte = chunk.getBiomeArray();
@@ -377,7 +409,10 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 {
                 	for (int y = block_height; y < Configs.worldgen.seaLevel; y++)
                 		primer.setBlockState(x, y, z, WATER);
-                	block_height = Configs.worldgen.seaLevel;
+                	if(isWet || this_biome == Biomes.RIVER)
+                		block_height = Configs.worldgen.seaLevel - 1;
+                	else
+                		block_height = Configs.worldgen.seaLevel;
                 }
                 else
                 {

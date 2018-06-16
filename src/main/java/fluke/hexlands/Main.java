@@ -66,8 +66,8 @@ public class Main
 	@EventHandler
 	public void startServer(FMLServerStartingEvent event) 
 	{
-		event.registerServerCommand(new DebugBiome()); //TODO delete
-		event.registerServerCommand(new SomeOtherShittyDebugCommand());
+		//event.registerServerCommand(new DebugBiome()); //TODO delete
+		//event.registerServerCommand(new SomeOtherShittyDebugCommand());
 	}
 	
 }

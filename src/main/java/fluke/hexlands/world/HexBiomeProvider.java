@@ -36,7 +36,6 @@ public class HexBiomeProvider extends BiomeProvider
     public HexBiomeProvider(long seed, WorldType worldTypeIn)
     {
     	this.biomeCache = new BiomeCache(this);
-        //this.biome = biomeIn;
         
         GenLayer[] agenlayer = GenLayer.initializeAllBiomeGenerators(seed, worldTypeIn, null);
         agenlayer = getModdedBiomeGenerators(worldTypeIn, seed, agenlayer);
