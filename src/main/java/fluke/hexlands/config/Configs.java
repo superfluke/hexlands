@@ -22,7 +22,7 @@ public class Configs {
 		@Config.Comment({"Size of biomes. Lower values = Larger biomes", "Default: 600"})
 		@Config.RequiresWorldRestart
 		public int biomeSize = 600;
-		@Config.Comment({"Height (y-level) terrain is adjusted by", "Default: 78"})
+		@Config.Comment({"Height (y-level) terrain is adjusted by (aka extra terrain noise inside the hex)", "Default: 78"})
 		@Config.RequiresWorldRestart
 		public int terrainHeight = 78;
 		@Config.Comment({"Height (y-level) terrain is before adjustments", "Default: 66"})
@@ -43,6 +43,9 @@ public class Configs {
 		@Config.Comment({"How many attempts per chunk to generate dungeons. Higher numbers = More dungeons", "Default: 8"})
 		@Config.RequiresWorldRestart
 		public int dungeonCount = 8;
+		@Config.Comment({"How much lower to adjust ocean and deep ocean biomes", "Default: 16"})
+		@Config.RequiresWorldRestart
+		public int oceanHeight = 16;
 
 		@Config.Comment({"Draw borders around every hex", "Default: false"})
 		@Config.RequiresWorldRestart

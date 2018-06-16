@@ -28,6 +28,7 @@ public class WorldTypeATest extends WorldType
 	
 	public net.minecraft.world.biome.BiomeProvider getBiomeProvider(World world)
     {
-        return new HexBiomeProvider(world.getWorldInfo());       
+        //return new HexBiomeProvider(world.getWorldInfo());
+		return new VanillaBiomeProvider(world.getWorldInfo());
     }
 }

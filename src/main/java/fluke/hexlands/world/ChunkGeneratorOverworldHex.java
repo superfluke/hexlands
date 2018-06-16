@@ -329,9 +329,8 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 
                 if(isWet)
                 {
-                	hex_height -= 6;
+                	hex_height -= Configs.worldgen.oceanHeight;
                 	block_height = hex_height;
-                	//block_height += (int)((50 * noise)*(bVar));
                 }
                 else if(this_biome == Biomes.MESA_CLEAR_ROCK)
                 {
@@ -374,11 +373,11 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
 						primer.setBlockState(x, y, z, STONE);
                 }
                 
-                if (block_height < 60)
+                if (block_height < Configs.worldgen.seaLevel)
                 {
                 	for (int y = block_height; y < Configs.worldgen.seaLevel; y++)
                 		primer.setBlockState(x, y, z, WATER);
-                	block_height = 60;
+                	block_height = Configs.worldgen.seaLevel;
                 }
                 else
                 {

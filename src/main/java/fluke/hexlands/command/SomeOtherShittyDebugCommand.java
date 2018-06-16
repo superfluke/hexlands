@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import com.google.common.collect.Lists;
 
 import fluke.hexlands.util.Reference;
+import fluke.hexlands.world.VanillaBiomeProvider;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
@@ -47,12 +48,21 @@ public class SomeOtherShittyDebugCommand extends CommandBase
     {
         if (sender instanceof EntityPlayer) 
         {
-        	List<Biome> water_biomes = Arrays.<Biome>asList(Biomes.OCEAN, Biomes.DEEP_OCEAN, Biomes.RIVER);
-        	//List<Biome> test = Arrays.<Biome>asList(Biomes.RIVER);
-        	Biome testo = Biomes.DESERT;
-        	boolean flag = water_biomes.contains(testo);
-        	System.out.println(flag);
-        	 //sender.sendMessage(new TextComponentString("Water Biomes: " + flag));
+        	double x = ((EntityPlayer) sender).posX;
+        	double z = ((EntityPlayer) sender).posZ;
+//        	List<Biome> water_biomes = Arrays.<Biome>asList(Biomes.OCEAN, Biomes.DEEP_OCEAN, Biomes.RIVER);
+//        	//List<Biome> test = Arrays.<Biome>asList(Biomes.RIVER);
+//        	Biome testo = Biomes.DESERT;
+//        	boolean flag = water_biomes.contains(testo);
+//        	System.out.println(flag);
+//        	 //sender.sendMessage(new TextComponentString("Water Biomes: " + flag));
+        	
+        	Biome[] blist = ((VanillaBiomeProvider) server.worlds[0].getBiomeProvider()).viableList((int)x, (int)z, 6);
+        	for (int i=0; i<blist.length; i++)
+        	{
+        		sender.sendMessage(new TextComponentString(blist[i].getBiomeName()));
+        	}
+        	
         }
     }
 	

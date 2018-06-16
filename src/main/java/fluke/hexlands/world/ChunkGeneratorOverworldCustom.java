@@ -106,7 +106,7 @@ public class ChunkGeneratorOverworldCustom implements IChunkGenerator
                 ///bBas *= 0.2;
                 //bBas = bBas * 8.5F / 8.0F;
                 bBas = 8.5F + bBas * 4.0F;
-                System.out.printf("biome: %s, bVar: %f,  bBas: %f\n", this_biome.getBiomeName(), bVar, bBas);
+                //System.out.printf("biome: %s, bVar: %f,  bBas: %f\n", this_biome.getBiomeName(), bVar, bBas);
                 
                 //double noise3D = this.simnoise.noise(realX/60, realX/60, realZ/60);
                 //double noise = Math.abs(this.simnoise.noise(realX, realZ, 1/2, 1/2, 0.5, 1));

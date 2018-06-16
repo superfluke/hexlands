@@ -139,7 +139,7 @@ public class HexBiomeProvider extends BiomeProvider
             System.arraycopy(abiome, 0, listToReuse, 0, width * length);
             return listToReuse;
         }
-        else //TODO am I assuming these are realX and realZ rather than chunk cords?
+        else 
         {
             //int[] aint = this.biomeIndexLayer.getInts(x, z, width, length);
         	
@@ -165,7 +165,7 @@ public class HexBiomeProvider extends BiomeProvider
             return listToReuse;
         }
     }
-
+    
     @Nullable
     public BlockPos findBiomePosition(int x, int z, int range, List<Biome> biomes, Random random)
     {
@@ -176,26 +176,33 @@ public class HexBiomeProvider extends BiomeProvider
         int zEnd = z + range >> 2;
         int xRange = xEnd - xStart + 1;
         int zRange = zEnd - zStart + 1;
-        
-        //int[] aint = this.genBiomes.getInts(xStart, zStart, xRange, zRange);
-        Biome[] biomeList = getBiomes(null, xStart, zStart, xRange, zRange);
 
         BlockPos blockpos = null;
         int k1 = 0;
 
-        for (int l1 = 0; l1 < xRange * zRange; ++l1)
+        Hex prev_hex = hex_layout.pixelToHex(new Point(xStart-1000, zStart-1000)).hexRound();
+    	Biome new_biome = Biomes.DEFAULT;
+    	
+        for (int i = 0; i < xRange * zRange; i++)
         {
-            int i2 = xStart + l1 % xRange << 2;
-            int j2 = zStart + l1 / xRange << 2;
-            Biome biome = biomeList[l1];
-
-            if (biomes.contains(biome) && (blockpos == null || random.nextInt(k1 + 1) == 0))
-            {
-                blockpos = new BlockPos(i2, 0, j2);
-                ++k1;
-            }
+        	//get the hex cords of the current point
+        	int xCord = xStart + i % xRange << 2;
+            int zCord = zStart + i / xRange << 2;
+        	Hex hexy = hex_layout.pixelToHex(new Point(xCord, zCord)).hexRound();
+        	
+        	if (hexy.q != prev_hex.q || hexy.r != prev_hex.r)
+        	{	
+        		//get a new biome based on current hex cords
+	    		new_biome = Biome.getBiome(this.biomeIndexLayer.getInts(hexy.q*Configs.worldgen.biomeSize, hexy.r*Configs.worldgen.biomeSize, 1, 1)[0], Biomes.DEFAULT);
+	    		if (biomes.contains(new_biome) && (blockpos == null || random.nextInt(k1 + 1) == 0))
+				{
+	    			blockpos = new BlockPos(xCord, 0, zCord);
+	                ++k1;
+				}
+	    		prev_hex = hexy;
+        	}
         }
-
+        
         return blockpos;
     }
 
@@ -204,42 +211,37 @@ public class HexBiomeProvider extends BiomeProvider
      */
     public boolean areBiomesViable(int x, int z, int range, List<Biome> allowed)
     {
-    	IntCache.resetIntCache();
-        int xStart = x - range >> 2;
+    	//I have no idea wtf happens here but it all breaks if you remove the bit shift
+    	int xStart = x - range >> 2;
         int zStart = z - range >> 2;
         int xEnd = x + range >> 2;
         int zEnd = z + range >> 2;
         int xRange = xEnd - xStart + 1;
         int zRange = zEnd - zStart + 1;
         
-        //int[] aint = this.genBiomes.getInts(xStart, zStart, xRange, zRange);
-        Biome[] biomeList = getBiomes(null, xStart, zStart, xRange, zRange);
-
-        try
+        Hex prev_hex = hex_layout.pixelToHex(new Point(xStart-1000, zStart-1000)).hexRound();
+    	Biome new_biome = Biomes.DEFAULT;
+    	
+        for (int i = 0; i < xRange * zRange; i++)
         {
-            for (int k1 = 0; k1 < xRange * zRange; ++k1)
-            {
-                Biome biome = biomeList[k1];
-
-                if (!allowed.contains(biome))
-                {
-                    return false;
-                }
-            }
-
-            return true;
+        	//get the hex cords of the current point
+        	int xCord = xStart + i % xRange << 2;
+            int zCord = zStart + i / xRange << 2;
+        	Hex hexy = hex_layout.pixelToHex(new Point(xCord, zCord)).hexRound();
+        	
+        	if (hexy.q != prev_hex.q || hexy.r != prev_hex.r)
+        	{	
+        		//get a new biome based on current hex cords
+	    		new_biome = Biome.getBiome(this.biomeIndexLayer.getInts(hexy.q*Configs.worldgen.biomeSize, hexy.r*Configs.worldgen.biomeSize, 1, 1)[0], Biomes.DEFAULT);
+	    		if (!allowed.contains(new_biome))
+				{
+	    			return false; //naughty biome found, bail
+				}
+	    		prev_hex = hexy;
+        	}
         }
-        catch (Throwable throwable)
-        {
-            CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Invalid Biome id");
-            CrashReportCategory crashreportcategory = crashreport.makeCategory("Layer");
-            crashreportcategory.addCrashSection("Layer", this.genBiomes.toString());
-            crashreportcategory.addCrashSection("x", Integer.valueOf(x));
-            crashreportcategory.addCrashSection("z", Integer.valueOf(z));
-            crashreportcategory.addCrashSection("radius", Integer.valueOf(range));
-            crashreportcategory.addCrashSection("allowed", allowed);
-            throw new ReportedException(crashreport);
-        }
+        
+        return true; //all biomes in range seem good man
     }
 
     public boolean isFixedBiome()

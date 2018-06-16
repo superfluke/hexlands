@@ -54,7 +54,7 @@ public class Main
 		}
 		
 		worldTypeFluke = new WorldTypeFluke();
-		//aTest = new WorldTypeATest();
+//		aTest = new WorldTypeATest();
 	}
 	
 	@EventHandler
@@ -66,7 +66,7 @@ public class Main
 	@EventHandler
 	public void startServer(FMLServerStartingEvent event) 
 	{
-		event.registerServerCommand(new DebugBiome());
+		event.registerServerCommand(new DebugBiome()); //TODO delete
 		event.registerServerCommand(new SomeOtherShittyDebugCommand());
 	}
 	
