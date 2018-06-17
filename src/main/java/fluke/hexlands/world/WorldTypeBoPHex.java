@@ -8,12 +8,12 @@ import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-public class WorldTypeFluke extends WorldType
+public class WorldTypeBoPHex extends WorldType
 {
 	
-	public WorldTypeFluke()
+	public WorldTypeBoPHex()
 	{
-		super("hexlands");
+		super("bophex");
 	}
 	
 	@Override
@@ -30,12 +30,12 @@ public class WorldTypeFluke extends WorldType
 	
 	public net.minecraft.world.biome.BiomeProvider getBiomeProvider(World world)
     {
-        return new HexBiomeProvider(world.getWorldInfo());        
+        return new HexBoPProvider(world.getWorldInfo());        
     }
 	
 	@SideOnly(Side.CLIENT)
     public String getTranslationKey()
     {
-        return "Hex Lands";
+        return "BoP Hex Lands";
     }
 }

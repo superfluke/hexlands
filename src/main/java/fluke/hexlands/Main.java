@@ -19,13 +19,15 @@ import fluke.hexlands.proxy.CommonProxy;
 import fluke.hexlands.util.Reference;
 import fluke.hexlands.world.WorldProviderHex;
 import fluke.hexlands.world.WorldTypeATest;
-import fluke.hexlands.world.WorldTypeFluke;
+import fluke.hexlands.world.WorldTypeBoPHex;
+import fluke.hexlands.world.WorldTypeHexlands;
 //import fluke.hexlands.world.BiomeEditor;
 
 @Mod(modid = Reference.MOD_ID, name = Reference.NAME, version = Reference.VERSION, acceptableRemoteVersions="*")
 public class Main 
 {
-	public static WorldTypeFluke worldTypeFluke;
+	public static WorldTypeHexlands worldTypeFluke;
+	public static WorldTypeBoPHex worldTypeBoPHex;
 	public static WorldTypeATest aTest;
 	public static final Logger LOGGER = LogManager.getLogger(Reference.MOD_ID);
 	public static final DimensionType HEX_DIM = DimensionType.register("hex", "_lands", Configs.dimension.dimID, WorldProviderHex.class, false);
@@ -53,7 +55,8 @@ public class Main
 			DimensionManager.registerDimension(OVERWORLD_ID, DimensionType.register("overworld", "_hex", OVERWORLD_ID, WorldProviderHex.class, true));
 		}
 		
-		worldTypeFluke = new WorldTypeFluke();
+		worldTypeFluke = new WorldTypeHexlands();
+		worldTypeBoPHex = new WorldTypeBoPHex();
 //		aTest = new WorldTypeATest();
 	}
 	
