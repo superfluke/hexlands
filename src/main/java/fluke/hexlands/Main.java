@@ -50,11 +50,6 @@ public class Main
 	@EventHandler
 	public static void init(FMLInitializationEvent event)
 	{
-		if (Configs.dimension.forceHexGen)
-		{
-			DimensionManager.unregisterDimension(OVERWORLD_ID);
-			DimensionManager.registerDimension(OVERWORLD_ID, DimensionType.register("overworld", "_hex", OVERWORLD_ID, WorldProviderHex.class, true));
-		}
 		
 		worldTypeFluke = new WorldTypeHexlands();
 		if (Loader.isModLoaded("biomesoplenty"))

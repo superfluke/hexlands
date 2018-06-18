@@ -102,10 +102,6 @@ public class Configs {
 		@Config.Comment({"What dimension ID to use", "Default: 88"})
 		@Config.RequiresWorldRestart
 		public int dimID = 88;
-		
-		@Config.Comment({"Force overworld hex generation even when world type is not selected", "Default: false"})
-		@Config.RequiresWorldRestart
-		public boolean forceHexGen = false;
 	}
 
 	@SubscribeEvent
