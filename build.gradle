@@ -55,7 +55,7 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
     
-    deobfCompile ("com.github.glitchfiend.biomesoplenty:BiomesOPlenty:1.12.2-7.0.1.2391:deobf")
+    deobfProvided ("com.github.glitchfiend.biomesoplenty:BiomesOPlenty:1.12.2-7.0.1.2391:deobf")
 
 }
 

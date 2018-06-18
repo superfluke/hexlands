@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 
 import net.minecraft.world.DimensionType;
 import net.minecraftforge.common.DimensionManager;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -56,7 +57,8 @@ public class Main
 		}
 		
 		worldTypeFluke = new WorldTypeHexlands();
-		worldTypeBoPHex = new WorldTypeBoPHex();
+		if (Loader.isModLoaded("biomesoplenty"))
+			worldTypeBoPHex = new WorldTypeBoPHex();
 //		aTest = new WorldTypeATest();
 	}
 	
