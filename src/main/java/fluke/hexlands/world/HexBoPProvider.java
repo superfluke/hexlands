@@ -38,26 +38,16 @@ public class HexBoPProvider extends BiomeProviderBOP
     private GenLayer biomeIndexLayer;
     /** The biome list. */
     private final BiomeCache biomeCache;
-    
-//    public HexBoPProvider(long seed, WorldType worldTypeIn)
-//    {
-//    	this.biomeCache = new BiomeCache(this);
-//        
-//        GenLayer[] agenlayer = GenLayer.initializeAllBiomeGenerators(seed, worldTypeIn, null);
-//        agenlayer = getModdedBiomeGenerators(worldTypeIn, seed, agenlayer);
-//        this.genBiomes = agenlayer[0];
-//        this.biomeIndexLayer = agenlayer[1];
-//    	
-//    }
+    private final static WorldTypeBOP totallyLegitBoPWorldType = new WorldTypeBOP();
     
     public HexBoPProvider(WorldInfo info)
-    {
-    	super(info.getSeed(), new WorldTypeBOP(), "");
-    	this.biomeCache = new BiomeCache(this);
-    	//this(info.getSeed(), info.getTerrainType());
+    {	
     	
+    	super(info.getSeed(), totallyLegitBoPWorldType, "");
+    	
+    	this.biomeCache = new BiomeCache(this);
     	GenLayer[] agenlayer = setupBOPGenLayers(info.getSeed(), new BOPWorldSettings(""));
-        agenlayer = getModdedBiomeGenerators(new WorldTypeBOP(), info.getSeed(), agenlayer);
+        agenlayer = getModdedBiomeGenerators(totallyLegitBoPWorldType, info.getSeed(), agenlayer);
         this.genBiomes = Generators.biomeGenLayer = agenlayer[0];
         this.biomeIndexLayer = Generators.biomeIndexLayer = agenlayer[1];
     }
