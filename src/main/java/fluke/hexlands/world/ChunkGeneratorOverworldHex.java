@@ -43,6 +43,7 @@ import net.minecraftforge.fml.common.registry.ForgeRegistries;
 public class ChunkGeneratorOverworldHex implements IChunkGenerator
 {
 	private final Random rand;
+	private final Random hexrand;
     final World world;
     Biome[] biomesForGeneration;
     protected static final IBlockState WATER = Blocks.WATER.getDefaultState();
@@ -51,6 +52,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
 
     protected Layout hex_layout = new Layout(Layout.flat, new Point(Configs.worldgen.hexSize, Configs.worldgen.hexSize), new Point(0, 0));
 
+    
     private MapGenBase caveGenerator = new MapGenCaves();
     private MapGenStronghold strongholdGenerator = new MapGenStronghold();
     private MapGenVillage villageGenerator = new MapGenVillage();
@@ -65,6 +67,8 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     
     public double[] heightmap;
     public Biome[] biomemap;
+    public boolean generateMissingHex = false;
+    public int missingHexChance;
     
     public ChunkGeneratorOverworldHex(final World world)
     {
@@ -84,8 +88,12 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
         this.world = world;
         world.setSeaLevel(Configs.worldgen.seaLevel);
         this.rand = new Random(world.getSeed());
+        this.hexrand = new Random(world.getSeed());
         heightmap = new double[256];
         biomemap = new Biome[256];
+        
+        missingHexChance = Configs.worldgen.missingHexChance;
+        generateMissingHex = (missingHexChance > 0);
         
         //terrainNoise = new OpenSimplexNoiseGeneratorOctaves(world.getSeed());
         //simnoise = new SimplexNoise();
@@ -184,6 +192,15 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 //convert x,z to a hex cords (q,r)
                 Hex hexy = hex_layout.pixelToHex(new Point(realX, realZ)).hexRound();
                 
+                if (generateMissingHex)
+                {
+                	
+                	if( Hex.isHexVoid(world.getSeed(), hexrand, hexy.q, hexy.r))
+                	{
+                		continue;
+                	}
+                }
+                
                 //convert hex cords back to x,z to get center point
                 Point center_pt =  hex_layout.hexToPixel(hexy);
 
@@ -191,6 +208,8 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 boolean isHardEdge = false;
 
                 Biome this_biome = this.biomemap[x + z * 16];
+            
+                	
                 boolean isWet = this_biome == Biomes.OCEAN || this_biome == Biomes.DEEP_OCEAN;
                 
                 double hex_noise = SimplexNoise.noise(center_pt.getX()/60, center_pt.getZ()/60);
@@ -211,15 +230,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
             	
                 if (biomeBaseHeightRaw < 0) //put negative values back in their place after that last adjustment
             		biomeBaseHeight *= -1;
-                
-                /*one day ill learn how to debug like a real man... not today
-                if (lastBaseHight != biomeBaseHeight)
-                {
-	                System.out.printf("biome: %s, preb: %f, postb: %f\n", this_biome.getBiomeName(), biomeBaseHeightRaw, biomeBaseHeight);
-                }
-                lastBaseHight = biomeBaseHeight;
-                */
-                
+
                 
                 
                 //figure out if we need to draw a line between 2 hexes
@@ -431,13 +442,11 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
             	{
             		if (isEdgeBlock)
             			primer.setBlockState(x, block_height+1, z, rimBlock);
-            	}
-            	
-             
+            	}           
             }
         }
     }
-    
+  
     private void generateBiomemap(int startX, int startZ) 
     {
 		for(int x=0; x<16; x++)

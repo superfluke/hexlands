@@ -33,6 +33,7 @@ public class HexBiomeProvider extends BiomeProvider
     /** The biome list. */
     private final BiomeCache biomeCache;
     
+    
     public HexBiomeProvider(long seed, WorldType worldTypeIn)
     {
     	this.biomeCache = new BiomeCache(this);
@@ -41,6 +42,7 @@ public class HexBiomeProvider extends BiomeProvider
         agenlayer = getModdedBiomeGenerators(worldTypeIn, seed, agenlayer);
         this.genBiomes = agenlayer[0];
         this.biomeIndexLayer = agenlayer[1];
+        
     }
     
     public HexBiomeProvider(WorldInfo info)
@@ -89,7 +91,9 @@ public class HexBiomeProvider extends BiomeProvider
             	
             	if (hexy.q != prev_hex.q || hexy.r != prev_hex.r)
             	{
-            		prev_biome = Biome.getBiome(this.biomeIndexLayer.getInts(hexy.q*Configs.worldgen.biomeSize, hexy.r*Configs.worldgen.biomeSize, 1, 1)[0], Biomes.DEFAULT);
+
+        			prev_biome = Biome.getBiome(this.biomeIndexLayer.getInts(hexy.q*Configs.worldgen.biomeSize, hexy.r*Configs.worldgen.biomeSize, 1, 1)[0], Biomes.DEFAULT);
+            		
             		prev_hex = hexy;
             	}
             	
@@ -153,8 +157,11 @@ public class HexBiomeProvider extends BiomeProvider
             	
             	//if this hex has different cords from the last hex
             	if (hexy.q != prev_hex.q || hexy.r != prev_hex.r)
-            	{	//get a new biome based on current hex cords
-            		prev_biome = Biome.getBiome(this.biomeIndexLayer.getInts(hexy.q*Configs.worldgen.biomeSize, hexy.r*Configs.worldgen.biomeSize, 1, 1)[0], Biomes.DEFAULT);
+            	{	
+            		//get a new biome based on current hex cords
+
+        			prev_biome = Biome.getBiome(this.biomeIndexLayer.getInts(hexy.q*Configs.worldgen.biomeSize, hexy.r*Configs.worldgen.biomeSize, 1, 1)[0], Biomes.DEFAULT);
+            		
             		prev_hex = hexy;
             	}
             	

@@ -46,6 +46,9 @@ public class Configs {
 		@Config.Comment({"How much lower to adjust ocean and deep ocean biomes", "Default: 16"})
 		@Config.RequiresWorldRestart
 		public int oceanHeight = 16;
+		@Config.Comment({"Percent chance that a hex generates as a void", "Default: 0"})
+		@Config.RequiresWorldRestart
+		public int missingHexChance = 0;
 
 		@Config.Comment({"Draw borders around every hex", "Default: false"})
 		@Config.RequiresWorldRestart

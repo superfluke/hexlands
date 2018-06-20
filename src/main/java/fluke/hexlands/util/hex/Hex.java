@@ -1,6 +1,9 @@
 package fluke.hexlands.util.hex;
 
 import java.util.ArrayList;
+import java.util.Random;
+
+import fluke.hexlands.config.Configs;
 
 public class Hex
 {
@@ -87,6 +90,24 @@ public class Hex
     public int distance(Hex b)
     {
         return subtract(b).length();
+    }
+    
+    public static void setupHexSeed(long worldSeed, Random rand, int q, int r)
+    {
+    	//System.out.println(worldSeed);
+    	rand.setSeed(worldSeed);
+        long i = rand.nextLong();
+        long j = rand.nextLong();
+        long k = (long)q * i;
+        long l = (long)r * j;
+        rand.setSeed(k ^ l ^ worldSeed);
+    }
+    
+    public static boolean isHexVoid(long worldSeed, Random rand, int q, int r)
+    {
+    	Hex.setupHexSeed(worldSeed, rand, q, r);
+    	int voidRand = rand.nextInt(100);
+    	return voidRand < Configs.worldgen.missingHexChance;
     }
 
 }

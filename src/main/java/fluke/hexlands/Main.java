@@ -13,11 +13,13 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import fluke.hexlands.command.DebugBiome;
 import fluke.hexlands.command.SomeOtherShittyDebugCommand;
 import fluke.hexlands.config.Configs;
 import fluke.hexlands.proxy.CommonProxy;
 import fluke.hexlands.util.Reference;
+import fluke.hexlands.world.WorldHandler;
 import fluke.hexlands.world.WorldProviderHex;
 import fluke.hexlands.world.WorldTypeATest;
 import fluke.hexlands.world.WorldTypeBoPHex;
@@ -45,6 +47,7 @@ public class Main
 	{
 		if (Configs.dimension.generateDim)
 			DimensionManager.registerDimension(Configs.dimension.dimID, HEX_DIM);
+		GameRegistry.registerWorldGenerator(new WorldHandler(), 9999999);
 	}
 	
 	@EventHandler
