@@ -34,7 +34,7 @@ public class Configs {
 		@Config.Comment({"Height (y-level) of oceans", "Default: 60"})
 		@Config.RequiresWorldRestart
 		public int seaLevel = 60;
-		@Config.Comment({"How much biomes influence the final height of the hex", "Default: 18"})
+		@Config.Comment({"How much biomes influence the final height of the hex. Higher numbers push biomes away from the terrainBaseline", "Default: 18"})
 		@Config.RequiresWorldRestart
 		public int biomeHeightAdjustment = 18;
 		@Config.Comment({"Extra height (y-level) to adjust each hex by, best used with outlineAll setting", "Default: 0"})
@@ -53,19 +53,19 @@ public class Configs {
 		@Config.Comment({"Master command for generating all vanilla structures: mineshaft, village, stronghold, temples, etc", "Default: true"})
 		@Config.RequiresWorldRestart
 		public boolean generateStructures = true;
-		@Config.Comment({"Generate mineshaft"})
+		@Config.Comment({"Generate mineshaft", "Default: true"})
 		@Config.RequiresWorldRestart
 		public boolean generateMineshaft = true;
-		@Config.Comment({"Generate temples"})
+		@Config.Comment({"Generate temples", "Default: true"})
 		@Config.RequiresWorldRestart
 		public boolean generateTemples = true;
-		@Config.Comment({"Generate villages"})
+		@Config.Comment({"Generate villages", "Default: true"})
 		@Config.RequiresWorldRestart
 		public boolean generateVillage = true;
-		@Config.Comment({"Generate stronghold"})
+		@Config.Comment({"Generate stronghold", "Default: true"})
 		@Config.RequiresWorldRestart
 		public boolean generateStronghold = true;
-		@Config.Comment({"Generate ocean monuments"})
+		@Config.Comment({"Generate ocean monuments", "Default: true"})
 		@Config.RequiresWorldRestart
 		public boolean generateMonuments = true;
 		@Config.Comment({"Generate caves", "Default: true"})
@@ -80,7 +80,7 @@ public class Configs {
 		@Config.Comment({"Should water lakes generate", "Default: true"})
 		@Config.RequiresWorldRestart
 		public boolean lakesGenerate = true;
-		@Config.Comment({"Should rare lava lakes generate on the surface", "Default: true"})
+		@Config.Comment({"Should lava lakes generate above y=10", "Default: true"})
 		@Config.RequiresWorldRestart
 		public boolean lavaLakesGenerate = true;
 

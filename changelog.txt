@@ -3,6 +3,9 @@
 Added Biomes O Plenty support
     Select BoP Hex Lands as world type
 Removed force hex generation option for now
+Remove lava lake config option now removes all lava lakes
+Tried making a few config options more clear
+
 
 1.3
 ----------
