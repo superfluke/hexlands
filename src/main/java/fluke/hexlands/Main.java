@@ -12,6 +12,7 @@ import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import fluke.hexlands.command.DebugBiome;
 import fluke.hexlands.command.SomeOtherShittyDebugCommand;
@@ -30,9 +31,11 @@ public class Main
 	public static WorldTypeHexlands worldTypeFluke;
 	public static WorldTypeBoPHex worldTypeBoPHex;
 	public static WorldTypeATest aTest;
+	public static HexServer server;
 	public static final Logger LOGGER = LogManager.getLogger(Reference.MOD_ID);
 	public static final DimensionType HEX_DIM = DimensionType.register("hex", "_lands", Configs.dimension.dimID, WorldProviderHex.class, false);
 	public static final int OVERWORLD_ID = 0;
+	
 	
 	@Instance
 	public static Main instance;
@@ -54,6 +57,7 @@ public class Main
 		worldTypeFluke = new WorldTypeHexlands();
 		if (Loader.isModLoaded("biomesoplenty"))
 			worldTypeBoPHex = new WorldTypeBoPHex();
+		proxy.init(event);
 //		aTest = new WorldTypeATest();
 	}
 	
@@ -69,5 +73,11 @@ public class Main
 		//event.registerServerCommand(new DebugBiome()); //TODO delete
 		//event.registerServerCommand(new SomeOtherShittyDebugCommand());
 	}
+	
+	@Mod.EventHandler
+    public void serverAboutToStart(FMLServerAboutToStartEvent event) 
+	{
+        proxy.serverAboutToStart(event);
+    }
 	
 }

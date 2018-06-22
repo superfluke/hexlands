@@ -87,6 +87,7 @@ public class Configs {
 		@Config.RequiresWorldRestart
 		@Config.Comment({"What block to use for dividing the grid, use @ for metadata", "Example: minecraft:concrete@6", "Default: minecraft:stonebrick"})
 		public String rimBlock = "minecraft:stonebrick";
+		
 		//TODO figure out why this doesnt work
 //		@Config.Comment({"Biomes black listed from generating (no ocean plains)", "Example: minecraft:forest", "Default:"})
 //		@Config.RequiresWorldRestart
@@ -98,10 +99,17 @@ public class Configs {
 		@Config.Comment({"Generate new dimension with hex-land generation", "Note: no method exists to travel to this dimension and must be added by the pack maker", "Default: false"})
 		@Config.RequiresWorldRestart
 		public boolean generateDim = false;
+		@Config.Comment({"Force overworld hex generation even when world type is not selected", "Default: false"})
+		@Config.RequiresWorldRestart
+		public boolean forceHexGen = false;
 		
 		@Config.Comment({"What dimension ID to use", "Default: 88"})
 		@Config.RequiresWorldRestart
 		public int dimID = 88;
+		
+		@Config.RequiresWorldRestart
+		@Config.Comment({"What world type to use if forceHexGen is enabled. Must be hexlands or bophex",  "Default: hexlands"})
+		public String forcedWorldType = "hexlands";
 	}
 
 	@SubscribeEvent
