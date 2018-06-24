@@ -3,6 +3,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import biomesoplenty.api.biome.BOPBiomes;
+
 import fluke.hexlands.config.Configs;
 import fluke.hexlands.util.SimplexNoise;
 import fluke.hexlands.util.hex.Hex;
@@ -207,14 +209,16 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 boolean isEdgeBlock = TestEdge.isEdge(new Point(realX, realZ), center_pt, hexy, Configs.worldgen.hexSize, Configs.worldgen.hexSize);
                 boolean isHardEdge = false;
 
-                Biome this_biome = this.biomemap[x + z * 16];
-            
-                	
+                Biome this_biome = this.biomemap[x + z * 16];                	
                 boolean isWet = this_biome == Biomes.OCEAN || this_biome == Biomes.DEEP_OCEAN;
                 
                 double hex_noise = SimplexNoise.noise(center_pt.getX()/60, center_pt.getZ()/60);
                 
                 float biomeBaseHeightRaw = this_biome.getBaseHeight();
+                
+                if (biomeBaseHeightRaw > 4.7)
+                	biomeBaseHeightRaw = 4.7F; //Looking at you BoP alps
+                
                 float biomeVariation = this_biome.getHeightVariation();
                 biomeVariation = biomeVariation * 0.6F + 0.1F;
                 float biomeBaseHeight = (biomeBaseHeightRaw * 16.0F - 1.0F) / 36.0F; //forces range -2 to 2 into -1 to 1
@@ -522,13 +526,13 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
 
         if (!villageHere && this.rand.nextInt(80 / 10) == 0)
         {
-            if (net.minecraftforge.event.terraingen.TerrainGen.populate(this, this.world, this.rand, x, z, villageHere, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.LAVA))
+            if (Configs.worldgen.lavaLakesGenerate && net.minecraftforge.event.terraingen.TerrainGen.populate(this, this.world, this.rand, x, z, villageHere, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.LAVA))
             {
                 int i2 = this.rand.nextInt(16) + 8;
                 int l2 = this.rand.nextInt(this.rand.nextInt(248) + 8);
                 int k3 = this.rand.nextInt(16) + 8;
 
-                if (l2 < this.world.getSeaLevel() || (this.rand.nextInt(80 / 8) == 0 && Configs.worldgen.lavaLakesGenerate))
+                if (l2 < this.world.getSeaLevel() || (this.rand.nextInt(80 / 8) == 0))
                 {
                     (new WorldGenLakes(Blocks.LAVA)).generate(this.world, this.rand, blockpos.add(i2, l2, k3));
                 }

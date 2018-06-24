@@ -1,8 +1,16 @@
+1.5
+----------
+Put a limit on biomes trying to be taller than the world (Alps)
+
+
 1.4
 ----------
 Added Biomes O Plenty support
     Select BoP Hex Lands as world type
 Removed force hex generation option for now
+Remove lava lake config option now removes all lava lakes
+Tried making a few config options more clear
+
 
 1.3
 ----------
