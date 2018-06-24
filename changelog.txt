@@ -1,3 +1,8 @@
+1.5
+----------
+Put a limit on biomes trying to be taller than the world (Alps)
+
+
 1.4
 ----------
 Added Biomes O Plenty support

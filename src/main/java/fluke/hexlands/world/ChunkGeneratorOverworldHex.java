@@ -3,6 +3,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import biomesoplenty.api.biome.BOPBiomes;
+
 import fluke.hexlands.config.Configs;
 import fluke.hexlands.util.SimplexNoise;
 import fluke.hexlands.util.hex.Hex;
@@ -190,12 +192,16 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 boolean isEdgeBlock = TestEdge.isEdge(new Point(realX, realZ), center_pt, hexy, Configs.worldgen.hexSize, Configs.worldgen.hexSize);
                 boolean isHardEdge = false;
 
-                Biome this_biome = this.biomemap[x + z * 16];
+                Biome this_biome = this.biomemap[x + z * 16];                	
                 boolean isWet = this_biome == Biomes.OCEAN || this_biome == Biomes.DEEP_OCEAN;
                 
                 double hex_noise = SimplexNoise.noise(center_pt.getX()/60, center_pt.getZ()/60);
                 
                 float biomeBaseHeightRaw = this_biome.getBaseHeight();
+                
+                if (biomeBaseHeightRaw > 4.7)
+                	biomeBaseHeightRaw = 4.7F; //Looking at you BoP alps
+                
                 float biomeVariation = this_biome.getHeightVariation();
                 biomeVariation = biomeVariation * 0.6F + 0.1F;
                 float biomeBaseHeight = (biomeBaseHeightRaw * 16.0F - 1.0F) / 36.0F; //forces range -2 to 2 into -1 to 1
