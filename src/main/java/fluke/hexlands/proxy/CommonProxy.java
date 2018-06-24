@@ -16,7 +16,7 @@ public class CommonProxy
 	{
 		//server = new HexServer();
 		//server.init();
-		overrideNether();
+		overrideNether(); //TODO config option
 	}
 	
 	public void serverAboutToStart(FMLServerAboutToStartEvent event) 

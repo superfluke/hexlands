@@ -51,17 +51,6 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
 //    /** Holds the noise used to determine whether slowsand can be generated at a location */
 //    private double[] slowsandNoise = new double[256];
 //    private double[] gravelNoise = new double[256];
-//    private double[] depthBuffer = new double[256];
-//    private double[] buffer;
-//    private NoiseGeneratorOctaves lperlinNoise1;
-//    private NoiseGeneratorOctaves lperlinNoise2;
-//    private NoiseGeneratorOctaves perlinNoise1;
-//    /** Determines whether slowsand or gravel can be generated at a location */
-//    private NoiseGeneratorOctaves slowsandGravelNoiseGen;
-//    /** Determines whether something other than nettherack can be generated at a location */
-//    private NoiseGeneratorOctaves netherrackExculsivityNoiseGen;
-//    public NoiseGeneratorOctaves scaleNoise;
-//    public NoiseGeneratorOctaves depthNoise;
     private final WorldGenFire fireFeature = new WorldGenFire();
     private final WorldGenGlowStone1 lightGemGen = new WorldGenGlowStone1();
     private final WorldGenGlowStone2 hellPortalGen = new WorldGenGlowStone2();
@@ -72,14 +61,11 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
     private final WorldGenBush brownMushroomFeature = new WorldGenBush(Blocks.BROWN_MUSHROOM);
     private final WorldGenBush redMushroomFeature = new WorldGenBush(Blocks.RED_MUSHROOM);
     private MapGenNetherBridge genNetherBridge = new MapGenNetherBridge();
-//    private MapGenBase genNetherCaves = new MapGenCavesHell();
-//    double[] pnr;
-//    double[] ar;
-//    double[] br;
-//    double[] noiseData4;
-//    double[] dr;
+    private MapGenBase genNetherCaves = new MapGenCavesHell();
+
     protected Layout hex_layout = new Layout(Layout.flat, new Point(Configs.worldgen.hexSize, Configs.worldgen.hexSize), new Point(0, 0));
-    
+    public static int netherSeaLevel = 31;
+    public static int netherMaxHeight = 128;
 
     public ChunkGeneratorHellHex(World worldIn, boolean generateStructures, long seed)
     {
@@ -105,8 +91,8 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
 //        this.netherrackExculsivityNoiseGen = ctx.getPerlin3();
 //        this.scaleNoise = ctx.getScale();
 //        this.depthNoise = ctx.getDepth();
-//        this.genNetherBridge = (MapGenNetherBridge)net.minecraftforge.event.terraingen.TerrainGen.getModdedMapGen(genNetherBridge, net.minecraftforge.event.terraingen.InitMapGenEvent.EventType.NETHER_BRIDGE);
-//        this.genNetherCaves = net.minecraftforge.event.terraingen.TerrainGen.getModdedMapGen(genNetherCaves, net.minecraftforge.event.terraingen.InitMapGenEvent.EventType.NETHER_CAVE);
+        this.genNetherBridge = (MapGenNetherBridge)net.minecraftforge.event.terraingen.TerrainGen.getModdedMapGen(genNetherBridge, net.minecraftforge.event.terraingen.InitMapGenEvent.EventType.NETHER_BRIDGE);
+        this.genNetherCaves = net.minecraftforge.event.terraingen.TerrainGen.getModdedMapGen(genNetherCaves, net.minecraftforge.event.terraingen.InitMapGenEvent.EventType.NETHER_CAVE);
     }
 
 
@@ -114,15 +100,15 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
     {
     	
     	
-    	for (int x = 0; x < 16; x++)
+    	for (int x = 0; x < 16; x++) //TODO round noise stuff to avoid crop circles again
         {
             final int realX = x + chunkX * 16;
             
             for (int z = 0; z < 16; z++)
             {
                 final int realZ = z + chunkZ * 16;
-                int height = 40;
-                int roofDepth = 20;
+                int hexHeight = 35;
+                int hexRoofDepth = 20;
                 
                 //convert x,z to a hex cords (q,r)
                 Hex hexy = hex_layout.pixelToHex(new Point(realX, realZ)).hexRound();
@@ -130,21 +116,77 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
                 //convert hex cords back to x,z to get center point
                 Point center_pt =  hex_layout.hexToPixel(hexy);
                 
-                double hexNoise = SimplexNoise.noise(center_pt.getX()/40, center_pt.getZ()/40);
-                double roofNoise = SimplexNoise.noise(center_pt.getX()/20, center_pt.getZ()/20);
-                height += (hexNoise*26);
-                roofDepth += (roofNoise*16);
-//                System.out.println("Hex:"+hexy.q+" "+hexy.r+", "+hex_noise+" "+height);
-                for(int y=1; y<height; y++)
+                //some hexes will just be solid from top to bottom
+                double wallNoise = SimplexNoise.noise(center_pt.getX()/80, center_pt.getZ()/80);
+                boolean solidHex = (wallNoise > 0.4);
+                
+                if(solidHex)
                 {
-                	 primer.setBlockState(x, y, z, NETHERRACK);
+                	for(int y=1; y<netherMaxHeight; y++)
+                    {
+                    	 primer.setBlockState(x, y, z, NETHERRACK);
+                    }
                 }
-                for(int y2=(128-roofDepth); y2<128; y2++)
+                else
                 {
-                	primer.setBlockState(x, y2, z, NETHERRACK);
+                    double hexNoise = SimplexNoise.noise(center_pt.getX()/40, center_pt.getZ()/40);
+                    double roofHeightNoise = SimplexNoise.noise(center_pt.getX()/20, center_pt.getZ()/20);
+                    
+                    double terrainNoise = SimplexNoise.noise(realX, realZ, 160, 160, 0.5, 2);
+                    double terrainNoiser = SimplexNoise.noise(realX, realZ, 60, 60, 0.5, 4);
+                    double roofNoise = SimplexNoise.noise(realX, realZ, 120, 120, 0.5, 2);
+                    double roofNoiser = SimplexNoise.noise(realX, realZ, 80, 80, 0.5, 4);
+                    
+                    double hexTerrainNoise = terrainNoise + 0.7*terrainNoiser;
+                    double roofTerrainNoise = roofNoise + 0.7*roofNoiser;
+                    double midlandTerrainNoise = terrainNoise*0.8 + 0.5*roofNoise + 0.5*roofNoiser;
+                    double midlandRoofNoise = Math.abs(roofNoise*0.8 + 0.5*terrainNoise + 0.5*terrainNoiser);
+                    
+                    //y level of terrain from bottom bedrock
+                    hexHeight += (hexNoise*26);
+                    int height = (int) (hexHeight + (hexTerrainNoise*6));
+                    
+                    //y level terrain should extend down from top bedrock
+                    hexRoofDepth += (roofHeightNoise*16);
+                    int roofDepth = (int) (hexRoofDepth + (roofTerrainNoise*6));
+                    
+                    //y level of in between layers if we decide to use it
+                    int midLand = ((netherMaxHeight - hexRoofDepth) + hexHeight)/2;
+                    
+//                    System.out.println(realX + " " + realZ + " " + hexHeight + " " + height + " " + hexTerrainNoise);
+                    for(int y=1; y<height; y++)
+                    {
+                    	 primer.setBlockState(x, y, z, NETHERRACK);
+                    }
+                    if(height <= netherSeaLevel)
+                    {
+                    	for(int y=height; y<=netherSeaLevel; y++)
+                        {
+                        	 primer.setBlockState(x, y, z, LAVA);
+                        }
+                    }
+                    for(int y2=(netherMaxHeight-roofDepth); y2<netherMaxHeight; y2++)
+                    {
+                    	primer.setBlockState(x, y2, z, NETHERRACK);
+                    }
+                    
+                    double midLandNoise = SimplexNoise.noise(center_pt.getX()/40, midLand, center_pt.getZ()/40);
+                    
+                    if(midLandNoise > -0.2)
+                    {
+                    	int midThicc = (int)(Math.abs(midLandNoise)*6) + 3;
+                    	int midBottom = (int) ((midLand - midThicc) - (midlandRoofNoise * 4));
+                    	int midTop = (int) ((midLand + midThicc) + (midlandTerrainNoise  * 4));
+                    	for (int midY=midBottom; midY<midTop; midY++)
+                    	{
+                    		primer.setBlockState(x, midY, z, NETHERRACK);
+                    	}
+                    }
                 }
+                
+                //set top and bottom bedrock
                 primer.setBlockState(x, 0, z, BEDROCK);
-                primer.setBlockState(x, 128, z, BEDROCK);
+                primer.setBlockState(x, netherMaxHeight, z, BEDROCK);
             }
         }
     }
@@ -158,12 +200,12 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
         ChunkPrimer chunkprimer = new ChunkPrimer();
 
         this.generateTerrain(x, z, chunkprimer);
-//        this.genNetherCaves.generate(this.world, x, z, chunkprimer);
+        this.genNetherCaves.generate(this.world, x, z, chunkprimer);
 
-//        if (this.generateStructures)
-//        {
-//            this.genNetherBridge.generate(this.world, x, z, chunkprimer);
-//        }
+        if (this.generateStructures)
+        {
+            this.genNetherBridge.generate(this.world, x, z, chunkprimer);
+        }
 
         Chunk chunk = new Chunk(this.world, chunkprimer, x, z);
 //        Biome[] abiome = this.world.getBiomeProvider().getBiomes((Biome[])null, x * 16, z * 16, 16, 16);
@@ -192,7 +234,7 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
         Biome biome = this.world.getBiome(blockpos.add(16, 0, 16));
         ChunkPos chunkpos = new ChunkPos(x, z);
         this.genNetherBridge.generateStructure(this.world, this.rand, chunkpos);
-//
+
         if (net.minecraftforge.event.terraingen.TerrainGen.populate(this, this.world, this.rand, x, z, false, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.NETHER_LAVA))
         for (int k = 0; k < 8; ++k)
         {
