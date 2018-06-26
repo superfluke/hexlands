@@ -1,5 +1,7 @@
 package fluke.hexlands;
 
+import java.util.Arrays;
+
 import fluke.hexlands.config.Configs;
 import fluke.hexlands.proxy.CommonProxy;
 import fluke.hexlands.world.WorldTypeHexlands;
@@ -18,11 +20,11 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 public class HexServer
 {
 	public static final String[] SERVER_SETTINGS = new String[] { "q", "field_71340_o", "settings" };
-	public static final String[] INTEGRATED_WORLD_SETTINGS = new String[] {"m", "field_71350_m", "worldSettings"};
-	public static final String[] INTEGRATED_WORLD_TYPE = new String[] {"e", "field_77171_e", "terrainType"};
+//	public static final String[] INTEGRATED_WORLD_SETTINGS = new String[] {"m", "field_71350_m", "worldSettings"};
+//	public static final String[] INTEGRATED_WORLD_TYPE = new String[] {"e", "field_77171_e", "terrainType"};
 	
 	
-	public void init() 
+	public void init() //TODO implement forcedWorldType config option
 	{
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 		if (server instanceof DedicatedServer) 
@@ -32,22 +34,11 @@ public class HexServer
 			manager.setProperty("level-type", Configs.dimension.forcedWorldType);
 			manager.saveProperties();
 		}
-	}
-	
-	
-	public void serverAboutToStart() 
-	{
-
-		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-		if(server instanceof IntegratedServer)
+		else
 		{
-			//this isnt gonna work
-			WorldTypeHexlands forcedType = new WorldTypeHexlands();
-			IntegratedServer innie = (IntegratedServer) server;
-			WorldSettings worldSettings = ReflectionHelper.getPrivateValue(IntegratedServer.class, innie, INTEGRATED_WORLD_SETTINGS);
-			WorldType lameWorld = ReflectionHelper.getPrivateValue(WorldSettings.class, worldSettings, INTEGRATED_WORLD_TYPE);
-			ReflectionHelper.setPrivateValue(WorldSettings.class, worldSettings, forcedType, INTEGRATED_WORLD_TYPE);
-			System.out.println(lameWorld.getName());
+			//look at me, I'm the world type now
+			WorldType.WORLD_TYPES = new WorldTypeHexlands[]{new WorldTypeHexlands()};
+
 		}
 	}
 }
