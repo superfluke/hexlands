@@ -10,6 +10,7 @@ import fluke.hexlands.util.SimplexNoise;
 import fluke.hexlands.util.hex.Hex;
 import fluke.hexlands.util.hex.Layout;
 import fluke.hexlands.util.hex.Point;
+import fluke.hexlands.util.hex.TestEdge;
 
 import net.minecraft.block.BlockFalling;
 import net.minecraft.block.material.Material;
@@ -17,6 +18,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockMatcher;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.init.Blocks;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
@@ -36,6 +38,7 @@ import net.minecraft.world.gen.feature.WorldGenHellLava;
 import net.minecraft.world.gen.feature.WorldGenMinable;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import net.minecraft.world.gen.structure.MapGenNetherBridge;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 public class ChunkGeneratorHellHex implements IChunkGenerator
 {
@@ -45,6 +48,7 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
     protected static final IBlockState LAVA = Blocks.LAVA.getDefaultState();
     protected static final IBlockState GRAVEL = Blocks.GRAVEL.getDefaultState();
     protected static final IBlockState SOUL_SAND = Blocks.SOUL_SAND.getDefaultState();
+    protected static final IBlockState NETHER_WART_BLOCK = Blocks.NETHER_WART_BLOCK.getDefaultState();
     private final World world;
     private final boolean generateStructures;
     private final Random rand;
@@ -66,9 +70,11 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
     protected Layout hex_layout = new Layout(Layout.flat, new Point(Configs.worldgen.hexSize, Configs.worldgen.hexSize), new Point(0, 0));
     public static int netherSeaLevel = 31;
     public static int netherMaxHeight = 128;
+    private IBlockState rimBlock;
 
     public ChunkGeneratorHellHex(World worldIn, boolean generateStructures, long seed)
     {
+    	updateRimBlock();
         this.world = worldIn;
         this.generateStructures = generateStructures;
         this.rand = new Random(seed);
@@ -142,9 +148,10 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
                     double midlandTerrainNoise = terrainNoise*0.8 + 0.5*roofNoise + 0.5*roofNoiser;
                     double midlandRoofNoise = Math.abs(roofNoise*0.8 + 0.5*terrainNoise + 0.5*terrainNoiser);
                     
-                    //y level of terrain from bottom bedrock
+                    boolean isEdgeBlock = TestEdge.isEdge(new Point(realX, realZ), center_pt, hexy, Configs.worldgen.hexSize, Configs.worldgen.hexSize);
+                    
+                    //y level of lower hex before we adjust for terrain noise 
                     hexHeight += (hexNoise*26);
-                    int height = (int) (hexHeight + (hexTerrainNoise*6));
                     
                     //y level terrain should extend down from top bedrock
                     hexRoofDepth += (roofHeightNoise*16);
@@ -153,33 +160,77 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
                     //y level of in between layers if we decide to use it
                     int midLand = ((netherMaxHeight - hexRoofDepth) + hexHeight)/2;
                     
-//                    System.out.println(realX + " " + realZ + " " + hexHeight + " " + height + " " + hexTerrainNoise);
-                    for(int y=1; y<height; y++)
+                    //get distance to center point of hex
+                	int xdif = realX - center_pt.getX();
+                	int zdif = realZ - center_pt.getZ();
+                	double distance_from_origin = Math.sqrt(xdif*xdif+zdif*zdif);
+                	double distance_ratio = distance_from_origin/Configs.worldgen.hexSize;
+                	if (distance_ratio > 0.9)
+                		distance_ratio = 0.9;
+                	
+                	int blockDesiredHeight = (int)Math.round(hexHeight + (hexTerrainNoise*6));
+                	
+                	//smooth out where the terrain wants to be with the height of the hex rim based on distance from center of hex
+                	int finalBlockHeight = (int)Math.round((blockDesiredHeight*(1-distance_ratio) + hexHeight*distance_ratio));
+                    
+
+                    for(int y=1; y<finalBlockHeight; y++)
                     {
+                    	//fill in lower hex from bottom bedrock to block height
                     	 primer.setBlockState(x, y, z, NETHERRACK);
                     }
-                    if(height <= netherSeaLevel)
+                    
+                    if(finalBlockHeight <= netherSeaLevel)
                     {
-                    	for(int y=height; y<=netherSeaLevel; y++)
+                    	for(int y=finalBlockHeight; y<=netherSeaLevel; y++)
                         {
+                    		//fill in lava if hex is lower than the nether 'sea level'
                         	 primer.setBlockState(x, y, z, LAVA);
                         }
                     }
+                    else if(isEdgeBlock)
+                    {
+                    	for(int y=finalBlockHeight; y<hexHeight; y++)
+                        {
+                    		//fill in blocks under rim if they are missing
+                    		primer.setBlockState(x, y, z, NETHERRACK);
+                        }
+                    	//draw the rim
+                    	primer.setBlockState(x, hexHeight, z, rimBlock);
+                    }
+                    
                     for(int y2=(netherMaxHeight-roofDepth); y2<netherMaxHeight; y2++)
                     {
+                    	//fill in top layer of netherrack for the roof
                     	primer.setBlockState(x, y2, z, NETHERRACK);
                     }
                     
-                    double midLandNoise = SimplexNoise.noise(center_pt.getX()/40, midLand, center_pt.getZ()/40);
                     
-                    if(midLandNoise > -0.2)
+                    double midLandNoise = SimplexNoise.noise(center_pt.getX()/20, midLand, center_pt.getZ()/20);
+                    
+                    //use simplex noise to decide when to draw midlands. should result in more connected hexes than pure rng
+                    if(midLandNoise > 0.1)
                     {
                     	int midThicc = (int)(Math.abs(midLandNoise)*6) + 3;
-                    	int midBottom = (int) ((midLand - midThicc) - (midlandRoofNoise * 4));
-                    	int midTop = (int) ((midLand + midThicc) + (midlandTerrainNoise  * 4));
-                    	for (int midY=midBottom; midY<midTop; midY++)
+                    	
+                    	int midHexBottom = (int) (midLand - midThicc);
+                    	int midBottomDesiredHeight = (int)Math.round(midHexBottom - (midlandRoofNoise * 4));
+                    	int midHexTop = (int) (midLand + midThicc);
+                    	int midTopDesiredHeight = (int)Math.round(midHexTop + (midlandTerrainNoise  * 4));
+                    	
+                    	//reuse same distance ratio from before since hexes are stacked
+                    	int finalBottomBlockHeight = (int)Math.round((midBottomDesiredHeight*(1-distance_ratio) + midHexBottom*distance_ratio));
+                    	int finalTopBlockHeight = (int)Math.round((midTopDesiredHeight*(1-distance_ratio) + midHexTop*distance_ratio));
+                    	
+                    	for (int midY=finalBottomBlockHeight; midY<finalTopBlockHeight; midY++)
                     	{
                     		primer.setBlockState(x, midY, z, NETHERRACK);
+                    	}
+                    	
+                    	if(isEdgeBlock)
+                    	{
+                    		primer.setBlockState(x, midHexTop, z, rimBlock);
+//                    		primer.setBlockState(x, midHexBottom, z, NETHER_WART_BLOCK);
                     	}
                     }
                 }
@@ -351,5 +402,18 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
     public void recreateStructures(Chunk chunkIn, int x, int z)
     {
         this.genNetherBridge.generate(this.world, x, z, (ChunkPrimer)null);
+    }
+    
+    public void updateRimBlock() {
+    	String rimblock = Configs.nether.netherRimBlock;
+    	if(rimblock.indexOf("@") > 0)
+    	{
+    		String[] metarim = rimblock.split("@");
+    		rimBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(metarim[0])).getStateFromMeta(Integer.parseInt(metarim[1]));
+    	}
+    	else
+    	{
+    		rimBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(rimblock)).getDefaultState();
+    	}
     }
 }

@@ -1,6 +1,7 @@
 package fluke.hexlands.proxy;
 
 import fluke.hexlands.HexServer;
+import fluke.hexlands.config.Configs;
 import fluke.hexlands.world.WorldProviderHexHell;
 import net.minecraft.item.Item;
 import net.minecraft.world.DimensionType;
@@ -16,7 +17,8 @@ public class CommonProxy
 	{
 		//server = new HexServer();
 		//server.init();
-		overrideNether(); //TODO config option
+		if(Configs.nether.useNetherHexGen)
+			overrideNether();
 	}
 	
 	public void serverAboutToStart(FMLServerAboutToStartEvent event) 

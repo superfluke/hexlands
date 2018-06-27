@@ -711,7 +711,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     	}
     	else
     	{
-    		rimBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Configs.worldgen.rimBlock)).getDefaultState();
+    		rimBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(rimblock)).getDefaultState();
     	}
     }
 }
