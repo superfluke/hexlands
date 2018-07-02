@@ -78,35 +78,15 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
         this.world = worldIn;
         this.generateStructures = generateStructures;
         this.rand = new Random(seed);
-//        this.lperlinNoise1 = new NoiseGeneratorOctaves(this.rand, 16);
-//        this.lperlinNoise2 = new NoiseGeneratorOctaves(this.rand, 16);
-//        this.perlinNoise1 = new NoiseGeneratorOctaves(this.rand, 8);
-//        this.slowsandGravelNoiseGen = new NoiseGeneratorOctaves(this.rand, 4);
-//        this.netherrackExculsivityNoiseGen = new NoiseGeneratorOctaves(this.rand, 4);
-//        this.scaleNoise = new NoiseGeneratorOctaves(this.rand, 10);
-//        this.depthNoise = new NoiseGeneratorOctaves(this.rand, 16);
-//        worldIn.setSeaLevel(63);
-//
-//        net.minecraftforge.event.terraingen.InitNoiseGensEvent.ContextHell ctx =
-//                new net.minecraftforge.event.terraingen.InitNoiseGensEvent.ContextHell(lperlinNoise1, lperlinNoise2, perlinNoise1, slowsandGravelNoiseGen, netherrackExculsivityNoiseGen, scaleNoise, depthNoise);
-//        ctx = net.minecraftforge.event.terraingen.TerrainGen.getModdedNoiseGenerators(worldIn, this.rand, ctx);
-//        this.lperlinNoise1 = ctx.getLPerlin1();
-//        this.lperlinNoise2 = ctx.getLPerlin2();
-//        this.perlinNoise1 = ctx.getPerlin();
-//        this.slowsandGravelNoiseGen = ctx.getPerlin2();
-//        this.netherrackExculsivityNoiseGen = ctx.getPerlin3();
-//        this.scaleNoise = ctx.getScale();
-//        this.depthNoise = ctx.getDepth();
         this.genNetherBridge = (MapGenNetherBridge)net.minecraftforge.event.terraingen.TerrainGen.getModdedMapGen(genNetherBridge, net.minecraftforge.event.terraingen.InitMapGenEvent.EventType.NETHER_BRIDGE);
         this.genNetherCaves = net.minecraftforge.event.terraingen.TerrainGen.getModdedMapGen(genNetherCaves, net.minecraftforge.event.terraingen.InitMapGenEvent.EventType.NETHER_CAVE);
     }
 
 
-    public void generateTerrain(final int chunkX, final int chunkZ, final ChunkPrimer primer)
+    public void generateTerrain(final int chunkX, final int chunkZ, final ChunkPrimer primer) //TODO bop nether biomes
     {
     	
-    	
-    	for (int x = 0; x < 16; x++) //TODO round noise stuff to avoid crop circles again
+    	for (int x = 0; x < 16; x++) 
         {
             final int realX = x + chunkX * 16;
             
@@ -135,6 +115,10 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
                 }
                 else
                 {
+                	double soulNoise = (SimplexNoise.noise(center_pt.getX()*7, center_pt.getZ()*7)+1)/2;
+                	boolean isTopHexSoul = (soulNoise > 0.86); //TODO config?
+                	boolean isBottomHexSoul = (soulNoise > 0.79 && soulNoise < 0.91);
+                	
                     double hexNoise = SimplexNoise.noise(center_pt.getX()/40, center_pt.getZ()/40);
                     double roofHeightNoise = SimplexNoise.noise(center_pt.getX()/20, center_pt.getZ()/20);
                     
@@ -177,7 +161,20 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
                     for(int y=1; y<finalBlockHeight; y++)
                     {
                     	//fill in lower hex from bottom bedrock to block height
-                    	 primer.setBlockState(x, y, z, NETHERRACK);
+                    	if(Configs.nether.netherExtendedRimBlock && isEdgeBlock)
+                    	{
+                    		primer.setBlockState(x, y, z, rimBlock);
+                    	}
+                    	else
+                    	{
+                    		primer.setBlockState(x, y, z, NETHERRACK);
+                    	}
+                    }
+                    
+                    //if this is a soulsand hex, reset surface block as soul sand
+                    if(isBottomHexSoul)
+                    {
+                    	primer.setBlockState(x, finalBlockHeight-1, z, SOUL_SAND);
                     }
                     
                     if(finalBlockHeight <= netherSeaLevel)
@@ -211,6 +208,7 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
                     //use simplex noise to decide when to draw midlands. should result in more connected hexes than pure rng
                     if(midLandNoise > 0.1)
                     {
+                    	//how thick the midland should be
                     	int midThicc = (int)(Math.abs(midLandNoise)*6) + 3;
                     	
                     	int midHexBottom = (int) (midLand - midThicc);
@@ -224,13 +222,25 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
                     	
                     	for (int midY=finalBottomBlockHeight; midY<finalTopBlockHeight; midY++)
                     	{
-                    		primer.setBlockState(x, midY, z, NETHERRACK);
+                    		if(Configs.nether.netherExtendedRimBlock && isEdgeBlock) 
+                        	{
+                        		primer.setBlockState(x, midY, z, rimBlock);
+                        	}
+                        	else
+                        	{
+                        		primer.setBlockState(x, midY, z, NETHERRACK);
+                        	}
                     	}
+                    	
+                    	
+                    	if(isTopHexSoul)
+                        {
+                        	primer.setBlockState(x, finalTopBlockHeight-1, z, SOUL_SAND);
+                        }
                     	
                     	if(isEdgeBlock)
                     	{
                     		primer.setBlockState(x, midHexTop, z, rimBlock);
-//                    		primer.setBlockState(x, midHexBottom, z, NETHER_WART_BLOCK);
                     	}
                     }
                 }
@@ -259,13 +269,13 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
         }
 
         Chunk chunk = new Chunk(this.world, chunkprimer, x, z);
-//        Biome[] abiome = this.world.getBiomeProvider().getBiomes((Biome[])null, x * 16, z * 16, 16, 16);
-//        byte[] abyte = chunk.getBiomeArray();
-//
-//        for (int i = 0; i < abyte.length; ++i)
-//        {
-//            abyte[i] = (byte)Biome.getIdForBiome(abiome[i]);
-//        }
+        Biome[] abiome = this.world.getBiomeProvider().getBiomes((Biome[])null, x * 16, z * 16, 16, 16);
+        byte[] abyte = chunk.getBiomeArray();
+
+        for (int i = 0; i < abyte.length; ++i)
+        {
+            abyte[i] = (byte)Biome.getIdForBiome(abiome[i]);
+        }
 
         chunk.resetRelightChecks();
         return chunk;

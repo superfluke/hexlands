@@ -123,6 +123,10 @@ public class Configs {
 		@Config.RequiresWorldRestart
 		@Config.Comment({"What block to use for dividing the grid in the nether, use @ for metadata", "Example: minecraft:concrete@6", "Default: minecraft:nether_wart_block"})
 		public String netherRimBlock = "minecraft:nether_wart_block";
+		
+		@Config.RequiresWorldRestart
+		@Config.Comment({"Extend rim blocks to bedrock for lower hexes and covers sides of midland hexes", "Default: false"})
+		public boolean netherExtendedRimBlock = false;
 	
 	}
 
