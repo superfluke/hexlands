@@ -240,7 +240,7 @@ public class HexBiomeProvider extends BiomeProvider
         	}
         }
         
-        return true; //all biomes in range seem good man
+        return true; //all biomes in range seems good man
     }
 
     public boolean isFixedBiome()

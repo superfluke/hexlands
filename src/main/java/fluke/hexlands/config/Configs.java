@@ -127,6 +127,10 @@ public class Configs {
 		@Config.RequiresWorldRestart
 		@Config.Comment({"Extend rim blocks to bedrock for lower hexes and covers sides of midland hexes", "Default: false"})
 		public boolean netherExtendedRimBlock = false;
+		
+		@Config.RequiresWorldRestart
+		@Config.Comment({"Use BoP nether biomes", "Default: true"})
+		public boolean netherUseBoPBiomes = true;
 	
 	}
 

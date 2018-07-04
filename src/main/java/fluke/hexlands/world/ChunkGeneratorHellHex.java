@@ -38,6 +38,7 @@ import net.minecraft.world.gen.feature.WorldGenHellLava;
 import net.minecraft.world.gen.feature.WorldGenMinable;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import net.minecraft.world.gen.structure.MapGenNetherBridge;
+import net.minecraftforge.common.ForgeModContainer;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 public class ChunkGeneratorHellHex implements IChunkGenerator
@@ -71,6 +72,7 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
     public static int netherSeaLevel = 31;
     public static int netherMaxHeight = 128;
     private IBlockState rimBlock;
+    public Biome[] biomemap;
 
     public ChunkGeneratorHellHex(World worldIn, boolean generateStructures, long seed)
     {
@@ -80,10 +82,11 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
         this.rand = new Random(seed);
         this.genNetherBridge = (MapGenNetherBridge)net.minecraftforge.event.terraingen.TerrainGen.getModdedMapGen(genNetherBridge, net.minecraftforge.event.terraingen.InitMapGenEvent.EventType.NETHER_BRIDGE);
         this.genNetherCaves = net.minecraftforge.event.terraingen.TerrainGen.getModdedMapGen(genNetherCaves, net.minecraftforge.event.terraingen.InitMapGenEvent.EventType.NETHER_CAVE);
+        biomemap = new Biome[256];
     }
 
 
-    public void generateTerrain(final int chunkX, final int chunkZ, final ChunkPrimer primer) //TODO bop nether biomes
+    public void generateTerrain(final int chunkX, final int chunkZ, final ChunkPrimer primer)
     {
     	
     	for (int x = 0; x < 16; x++) 
@@ -269,16 +272,33 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
         }
 
         Chunk chunk = new Chunk(this.world, chunkprimer, x, z);
-        Biome[] abiome = this.world.getBiomeProvider().getBiomes((Biome[])null, x * 16, z * 16, 16, 16);
+        //Biome[] abiome = this.world.getBiomeProvider().getBiomes((Biome[])null, x * 16, z * 16, 16, 16);
+        generateBiomemap(x*16, z*16);
+        this.replaceBiomeBlocks(x, z, chunkprimer, this.biomemap);
+        
         byte[] abyte = chunk.getBiomeArray();
 
         for (int i = 0; i < abyte.length; ++i)
         {
-            abyte[i] = (byte)Biome.getIdForBiome(abiome[i]);
+            abyte[i] = (byte)Biome.getIdForBiome(this.biomemap[i]);
         }
 
         chunk.resetRelightChecks();
         return chunk;
+    }
+    
+    public void replaceBiomeBlocks(int x, int z, ChunkPrimer primer, Biome[] biomesIn)
+    {
+        if (!net.minecraftforge.event.ForgeEventFactory.onReplaceBiomeBlocks(this, x, z, primer, this.world)) return;
+
+        for (int i = 0; i < 16; ++i)
+        {
+            for (int j = 0; j < 16; ++j)
+            {
+                Biome biome = biomesIn[j + i * 16];
+                biome.genTerrainBlocks(this.world, this.rand, primer, x * 16 + i, z * 16 + j, 0.5);//TODO pass in real noise?
+            }
+        }
     }
 
 
@@ -287,6 +307,10 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
      */
     public void populate(int x, int z)
     {
+    	//how to fix cascading world gen in one ez step
+    	boolean prevLogging = ForgeModContainer.logCascadingWorldGeneration;
+        ForgeModContainer.logCascadingWorldGeneration = false;
+        
         BlockFalling.fallInstantly = true;
         net.minecraftforge.event.ForgeEventFactory.onChunkPopulate(true, this, this.world, this.rand, x, z, false);
         int i = x * 16;
@@ -297,28 +321,28 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
         this.genNetherBridge.generateStructure(this.world, this.rand, chunkpos);
 
         if (net.minecraftforge.event.terraingen.TerrainGen.populate(this, this.world, this.rand, x, z, false, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.NETHER_LAVA))
-        for (int k = 0; k < 8; ++k)
-        {
-            this.hellSpringGen.generate(this.world, this.rand, blockpos.add(this.rand.nextInt(16) + 8, this.rand.nextInt(120) + 4, this.rand.nextInt(16) + 8));
-        }
+	        for (int k = 0; k < 8; ++k)
+	        {
+	            this.hellSpringGen.generate(this.world, this.rand, blockpos.add(this.rand.nextInt(16) + 8, this.rand.nextInt(120) + 4, this.rand.nextInt(16) + 8));
+	        }
 
         if (net.minecraftforge.event.terraingen.TerrainGen.populate(this, this.world, this.rand, x, z, false, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.FIRE))
-        for (int i1 = 0; i1 < this.rand.nextInt(this.rand.nextInt(10) + 1) + 1; ++i1)
-        {
-            this.fireFeature.generate(this.world, this.rand, blockpos.add(this.rand.nextInt(16) + 8, this.rand.nextInt(120) + 4, this.rand.nextInt(16) + 8));
-        }
+	        for (int i1 = 0; i1 < this.rand.nextInt(this.rand.nextInt(10) + 1) + 1; ++i1)
+	        {
+	            this.fireFeature.generate(this.world, this.rand, blockpos.add(this.rand.nextInt(16) + 8, this.rand.nextInt(120) + 4, this.rand.nextInt(16) + 8));
+	        }
 
         if (net.minecraftforge.event.terraingen.TerrainGen.populate(this, this.world, this.rand, x, z, false, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.GLOWSTONE))
         {
-        for (int j1 = 0; j1 < this.rand.nextInt(this.rand.nextInt(10) + 1); ++j1)
-        {
-            this.lightGemGen.generate(this.world, this.rand, blockpos.add(this.rand.nextInt(16) + 8, this.rand.nextInt(120) + 4, this.rand.nextInt(16) + 8));
-        }
-
-        for (int k1 = 0; k1 < 10; ++k1)
-        {
-            this.hellPortalGen.generate(this.world, this.rand, blockpos.add(this.rand.nextInt(16) + 8, this.rand.nextInt(128), this.rand.nextInt(16) + 8));
-        }
+	        for (int j1 = 0; j1 < this.rand.nextInt(this.rand.nextInt(10) + 1); ++j1)
+	        {
+	            this.lightGemGen.generate(this.world, this.rand, blockpos.add(this.rand.nextInt(16) + 8, this.rand.nextInt(120) + 4, this.rand.nextInt(16) + 8));
+	        }
+	
+	        for (int k1 = 0; k1 < 10; ++k1)
+	        {
+	            this.hellPortalGen.generate(this.world, this.rand, blockpos.add(this.rand.nextInt(16) + 8, this.rand.nextInt(128), this.rand.nextInt(16) + 8));
+	        }
         }//Forge: End doGLowstone
 
         net.minecraftforge.event.ForgeEventFactory.onChunkPopulate(false, this, this.world, this.rand, x, z, false);
@@ -326,45 +350,58 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
 
         if (net.minecraftforge.event.terraingen.TerrainGen.decorate(this.world, this.rand, blockpos, net.minecraftforge.event.terraingen.DecorateBiomeEvent.Decorate.EventType.SHROOM))
         {
-        if (this.rand.nextBoolean())
-        {
-            this.brownMushroomFeature.generate(this.world, this.rand, blockpos.add(this.rand.nextInt(16) + 8, this.rand.nextInt(128), this.rand.nextInt(16) + 8));
-        }
-
-        if (this.rand.nextBoolean())
-        {
-            this.redMushroomFeature.generate(this.world, this.rand, blockpos.add(this.rand.nextInt(16) + 8, this.rand.nextInt(128), this.rand.nextInt(16) + 8));
-        }
+	        if (this.rand.nextBoolean())
+	        {
+	            this.brownMushroomFeature.generate(this.world, this.rand, blockpos.add(this.rand.nextInt(16) + 8, this.rand.nextInt(128), this.rand.nextInt(16) + 8));
+	        }
+	
+	        if (this.rand.nextBoolean())
+	        {
+	            this.redMushroomFeature.generate(this.world, this.rand, blockpos.add(this.rand.nextInt(16) + 8, this.rand.nextInt(128), this.rand.nextInt(16) + 8));
+	        }
         }
 
 
         if (net.minecraftforge.event.terraingen.TerrainGen.generateOre(this.world, this.rand, quartzGen, blockpos, net.minecraftforge.event.terraingen.OreGenEvent.GenerateMinable.EventType.QUARTZ))
-        for (int l1 = 0; l1 < 16; ++l1)
-        {
-            this.quartzGen.generate(this.world, this.rand, blockpos.add(this.rand.nextInt(16), this.rand.nextInt(108) + 10, this.rand.nextInt(16)));
-        }
+	        for (int l1 = 0; l1 < 16; ++l1)
+	        {
+	            this.quartzGen.generate(this.world, this.rand, blockpos.add(this.rand.nextInt(16), this.rand.nextInt(108) + 10, this.rand.nextInt(16)));
+	        }
 
         int i2 = this.world.getSeaLevel() / 2 + 1;
 
         if (net.minecraftforge.event.terraingen.TerrainGen.populate(this, this.world, this.rand, x, z, false, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.NETHER_MAGMA))
-        for (int l = 0; l < 4; ++l)
-        {
-            this.magmaGen.generate(this.world, this.rand, blockpos.add(this.rand.nextInt(16), i2 - 5 + this.rand.nextInt(10), this.rand.nextInt(16)));
-        }
+	        for (int l = 0; l < 4; ++l)
+	        {
+	            this.magmaGen.generate(this.world, this.rand, blockpos.add(this.rand.nextInt(16), i2 - 5 + this.rand.nextInt(10), this.rand.nextInt(16)));
+	        }
 
         if (net.minecraftforge.event.terraingen.TerrainGen.populate(this, this.world, this.rand, x, z, false, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.NETHER_LAVA2))
-        for (int j2 = 0; j2 < 16; ++j2)
-        {
-            int offset = net.minecraftforge.common.ForgeModContainer.fixVanillaCascading ? 8 : 0; // MC-117810
-            this.lavaTrapGen.generate(this.world, this.rand, blockpos.add(this.rand.nextInt(16) + offset, this.rand.nextInt(108) + 10, this.rand.nextInt(16) + offset));
-        }
+	        for (int j2 = 0; j2 < 16; ++j2)
+	        {
+	            int offset = net.minecraftforge.common.ForgeModContainer.fixVanillaCascading ? 8 : 0; // MC-117810
+	            this.lavaTrapGen.generate(this.world, this.rand, blockpos.add(this.rand.nextInt(16) + offset, this.rand.nextInt(108) + 10, this.rand.nextInt(16) + offset));
+	        }
 
         biome.decorate(this.world, this.rand, new BlockPos(i, 0, j));
 
         net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.terraingen.DecorateBiomeEvent.Post(this.world, this.rand, blockpos));
 
         BlockFalling.fallInstantly = false;
+        ForgeModContainer.logCascadingWorldGeneration = prevLogging;
     }
+    
+    private void generateBiomemap(int startX, int startZ) 
+    {
+		for(int x=0; x<16; x++)
+		{
+			for(int z=0; z<16; z++)
+			{
+				this.biomemap[x + z * 16] = this.world.getBiomeProvider().getBiome(new BlockPos(startX+x, 0, startZ+z));
+			}
+		}
+		
+	}
 
     /**
      * Called to generate additional structures after initial worldgen, used by ocean monuments
@@ -389,7 +426,7 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
             }
         }
 
-        Biome biome = this.world.getBiome(pos);
+        Biome biome = this.world.getBiome(pos); 
         return biome.getSpawnableList(creatureType);
     }
 
