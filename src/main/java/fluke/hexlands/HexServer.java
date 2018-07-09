@@ -19,12 +19,9 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
 public class HexServer
 {
-	public static final String[] SERVER_SETTINGS = new String[] { "q", "field_71340_o", "settings" };
-//	public static final String[] INTEGRATED_WORLD_SETTINGS = new String[] {"m", "field_71350_m", "worldSettings"};
-//	public static final String[] INTEGRATED_WORLD_TYPE = new String[] {"e", "field_77171_e", "terrainType"};
+	public static final String[] SERVER_SETTINGS = new String[] { "q", "field_71340_o", "settings" };	
 	
-	
-	public void init() //TODO implement forcedWorldType config option
+	public void init() 
 	{
 		MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
 		if (server instanceof DedicatedServer) 
