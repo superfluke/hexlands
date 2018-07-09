@@ -15,15 +15,18 @@ public class CommonProxy
 	
 	public void init(FMLInitializationEvent event) 
 	{
-		//server = new HexServer();
-		//server.init();
 		if(Configs.nether.useNetherHexGen)
 			overrideNether();
+		if(Configs.dimension.forceHexGen)
+		{
+			server = new HexServer();
+			server.init();
+		}
 	}
 	
 	public void serverAboutToStart(FMLServerAboutToStartEvent event) 
 	{
-		//server.serverAboutToStart();
+//		server.serverAboutToStart();
 	}
 	
 	public void overrideNether()
