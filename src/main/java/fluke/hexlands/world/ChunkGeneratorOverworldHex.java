@@ -64,6 +64,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     private IBlockState rimBlock;
     //private WoodlandMansion woodlandMansionGenerator = new WoodlandMansion(this);
     public IBlockState rim2 = Block.getBlockFromName("minecraft:netherrack").getDefaultState();
+    public boolean useExtraHexNoise;
     
     public double[] heightmap;
     public Biome[] biomemap;
@@ -88,6 +89,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
         this.rand = new Random(world.getSeed());
         heightmap = new double[256];
         biomemap = new Biome[256];
+        useExtraHexNoise = (Configs.worldgen.extraHexNoise != 0);
         
         //terrainNoise = new OpenSimplexNoiseGeneratorOctaves(world.getSeed());
         //simnoise = new SimplexNoise();
@@ -195,7 +197,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 Biome this_biome = this.biomemap[x + z * 16];                	
                 boolean isWet = this_biome == Biomes.OCEAN || this_biome == Biomes.DEEP_OCEAN;
                 
-                double hex_noise = SimplexNoise.noise(center_pt.getX()/60, center_pt.getZ()/60);
+                
                 
                 float biomeBaseHeightRaw = this_biome.getBaseHeight();
                 
@@ -361,8 +363,12 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
             	}
 
                 //adjust height by noise
-                int hex_height = (int)(Configs.worldgen.terrainBaseline + Configs.worldgen.biomeHeightAdjustment * biomeBaseHeight + Configs.worldgen.extraHexNoise
-                		*hex_noise);
+                int hex_height = (int)(Configs.worldgen.terrainBaseline + Configs.worldgen.biomeHeightAdjustment * biomeBaseHeight);
+                if (useExtraHexNoise)
+                {
+                	double hex_noise = SimplexNoise.noise(center_pt.getX()/60, center_pt.getZ()/60);
+                	hex_height += Configs.worldgen.extraHexNoise*hex_noise;
+                }
                 int block_height = hex_height;
                 
                 if(isWet)
@@ -705,7 +711,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     	}
     	else
     	{
-    		rimBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(Configs.worldgen.rimBlock)).getDefaultState();
+    		rimBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(rimblock)).getDefaultState();
     	}
     }
 }

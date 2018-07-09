@@ -14,8 +14,10 @@ public class Configs {
 
 	public static ConfigWorldGen worldgen = new ConfigWorldGen();
 	public static ConfigDimension dimension = new ConfigDimension();
+	public static ConfigNether nether = new ConfigNether();
 
-	public static class ConfigWorldGen {
+	public static class ConfigWorldGen 
+	{
 		@Config.Comment({"Controls size of hex tiles. Larger number = Bigger hex", "Default: 36"})
 		@Config.RequiresWorldRestart
 		public int hexSize = 36;
@@ -111,9 +113,38 @@ public class Configs {
 		@Config.Comment({"What world type to use if forceHexGen is enabled. Must be hexlands or bophex",  "Default: hexlands"})
 		public String forcedWorldType = "hexlands";
 	}
+	
+	public static class ConfigNether
+	{
+		@Config.Comment({"Use hex generation in the nether", "Default: false"})
+		@Config.RequiresWorldRestart
+		public boolean useNetherHexGen = false;
+		
+		@Config.RequiresWorldRestart
+		@Config.Comment({"What block to use for dividing the grid in the nether, use @ for metadata", "Example: minecraft:concrete@6", "Default: minecraft:nether_wart_block"})
+		public String netherRimBlock = "minecraft:nether_wart_block";
+		
+		@Config.RequiresWorldRestart
+		@Config.Comment({"Extend rim blocks to bedrock for lower hexes and covers sides of midland hexes", "Default: false"})
+		public boolean netherExtendedRimBlock = false;
+		
+		@Config.RequiresWorldRestart
+		@Config.Comment({"Use BoP nether biomes if BoP is installed", "Default: true"})
+		public boolean netherUseBoPBiomes = true;
+		
+		@Config.Comment({"Percent chance top layer of hex is made of soul sand (between 0.0 and 1.0)", "Default: 0.14"})
+		@Config.RequiresWorldRestart
+		public double souldHexChance = 0.14;
+		
+		@Config.Comment({"Sea level for nether lava", "Default: 31"})
+		@Config.RequiresWorldRestart
+		public int netherSeaLevel = 31;
+	
+	}
 
 	@SubscribeEvent
-	public static void onConfigReload(ConfigChangedEvent.OnConfigChangedEvent event) {
+	public static void onConfigReload(ConfigChangedEvent.OnConfigChangedEvent event) 
+	{
 		if (Reference.MOD_ID.equals(event.getModID()))
 			ConfigManager.sync(Reference.MOD_ID, Config.Type.INSTANCE);
 	}
