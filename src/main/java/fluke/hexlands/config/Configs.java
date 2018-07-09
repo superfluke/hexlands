@@ -129,8 +129,16 @@ public class Configs {
 		public boolean netherExtendedRimBlock = false;
 		
 		@Config.RequiresWorldRestart
-		@Config.Comment({"Use BoP nether biomes", "Default: true"})
+		@Config.Comment({"Use BoP nether biomes if BoP is installed", "Default: true"})
 		public boolean netherUseBoPBiomes = true;
+		
+		@Config.Comment({"Percent chance top layer of hex is made of soul sand (between 0.0 and 1.0)", "Default: 0.14"})
+		@Config.RequiresWorldRestart
+		public double souldHexChance = 0.14;
+		
+		@Config.Comment({"Sea level for nether lava", "Default: 31"})
+		@Config.RequiresWorldRestart
+		public int netherSeaLevel = 31;
 	
 	}
 

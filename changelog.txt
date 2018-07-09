@@ -2,7 +2,8 @@
 ----------
 Put a limit on biomes trying to be taller than the world (Alps)
 Add forced world option back in
-Added config option for nether hex generation
+Added config option for nether hex generation (off by default) 
+Add BoP integration for nether biomes
 
 
 1.4

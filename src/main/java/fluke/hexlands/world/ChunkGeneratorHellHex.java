@@ -5,6 +5,9 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
+import biomesoplenty.common.biome.BOPBiome;
+import biomesoplenty.common.biome.nether.BOPHellBiome;
+
 import fluke.hexlands.config.Configs;
 import fluke.hexlands.util.SimplexNoise;
 import fluke.hexlands.util.hex.Hex;
@@ -17,6 +20,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockMatcher;
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -53,9 +57,6 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
     private final World world;
     private final boolean generateStructures;
     private final Random rand;
-//    /** Holds the noise used to determine whether slowsand can be generated at a location */
-//    private double[] slowsandNoise = new double[256];
-//    private double[] gravelNoise = new double[256];
     private final WorldGenFire fireFeature = new WorldGenFire();
     private final WorldGenGlowStone1 lightGemGen = new WorldGenGlowStone1();
     private final WorldGenGlowStone2 hellPortalGen = new WorldGenGlowStone2();
@@ -69,7 +70,7 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
     private MapGenBase genNetherCaves = new MapGenCavesHell();
 
     protected Layout hex_layout = new Layout(Layout.flat, new Point(Configs.worldgen.hexSize, Configs.worldgen.hexSize), new Point(0, 0));
-    public static int netherSeaLevel = 31;
+    public static int netherSeaLevel;
     public static int netherMaxHeight = 128;
     private IBlockState rimBlock;
     public Biome[] biomemap;
@@ -77,6 +78,7 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
     public ChunkGeneratorHellHex(World worldIn, boolean generateStructures, long seed)
     {
     	updateRimBlock();
+    	netherSeaLevel = Configs.nether.netherSeaLevel;
         this.world = worldIn;
         this.generateStructures = generateStructures;
         this.rand = new Random(seed);
@@ -119,8 +121,11 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
                 else
                 {
                 	double soulNoise = (SimplexNoise.noise(center_pt.getX()*7, center_pt.getZ()*7)+1)/2;
-                	boolean isTopHexSoul = (soulNoise > 0.86); //TODO config?
-                	boolean isBottomHexSoul = (soulNoise > 0.79 && soulNoise < 0.91);
+                	boolean isTopHexSoul = (soulNoise > (1-Configs.nether.souldHexChance)); //TODO config?
+//                	boolean isTopHexSoul = (soulNoise > 0.86); 
+                	double soulChanceOverlap = 1-(Configs.nether.souldHexChance*0.65);
+//                	boolean isBottomHexSoul = (soulNoise > 0.79 && soulNoise < 0.91);
+                	boolean isBottomHexSoul = (soulNoise < soulChanceOverlap && soulNoise > (soulChanceOverlap - Configs.nether.souldHexChance*0.8));
                 	
                     double hexNoise = SimplexNoise.noise(center_pt.getX()/40, center_pt.getZ()/40);
                     double roofHeightNoise = SimplexNoise.noise(center_pt.getX()/20, center_pt.getZ()/20);
@@ -271,10 +276,11 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
             this.genNetherBridge.generate(this.world, x, z, chunkprimer);
         }
 
-        Chunk chunk = new Chunk(this.world, chunkprimer, x, z);
+        
         //Biome[] abiome = this.world.getBiomeProvider().getBiomes((Biome[])null, x * 16, z * 16, 16, 16);
         generateBiomemap(x*16, z*16);
         this.replaceBiomeBlocks(x, z, chunkprimer, this.biomemap);
+        Chunk chunk = new Chunk(this.world, chunkprimer, x, z);
         
         byte[] abyte = chunk.getBiomeArray();
 
@@ -296,11 +302,10 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
             for (int j = 0; j < 16; ++j)
             {
                 Biome biome = biomesIn[j + i * 16];
-                biome.genTerrainBlocks(this.world, this.rand, primer, x * 16 + i, z * 16 + j, 0.5);//TODO pass in real noise?
+                biome.genTerrainBlocks(this.world, this.rand, primer, x * 16 + i, z * 16 + j, 0.5);
             }
         }
     }
-
 
     /**
      * Generate initial structures in this chunk, e.g. mineshafts, temples, lakes, and dungeons
@@ -316,7 +321,8 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
         int i = x * 16;
         int j = z * 16;
         BlockPos blockpos = new BlockPos(i, 0, j);
-        Biome biome = this.world.getBiome(blockpos.add(16, 0, 16));
+        //Biome biome = this.world.getBiome(blockpos.add(16, 0, 16));
+        Biome biome = this.world.getBiome(blockpos);
         ChunkPos chunkpos = new ChunkPos(x, z);
         this.genNetherBridge.generateStructure(this.world, this.rand, chunkpos);
 

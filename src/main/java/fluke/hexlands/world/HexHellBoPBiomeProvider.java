@@ -67,7 +67,7 @@ public class HexHellBoPBiomeProvider extends BiomeProvider
             	
             	if (hexy.q != prev_hex.q || hexy.r != prev_hex.r)
             	{
-            		prev_biome = Biome.getBiome(this.biomeIndexLayer.getInts(hexy.q*Configs.worldgen.biomeSize, hexy.r*Configs.worldgen.biomeSize, 1, 1)[0], Biomes.HELL);
+            		prev_biome = Biome.getBiome(this.biomeIndexLayer.getInts(hexy.q*(int)(Configs.worldgen.biomeSize/4), hexy.r*(int)(Configs.worldgen.biomeSize/4), 1, 1)[0], Biomes.HELL);
             		prev_hex = hexy;
             	}
             	
