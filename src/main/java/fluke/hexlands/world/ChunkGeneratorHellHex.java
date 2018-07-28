@@ -121,7 +121,7 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
                 else
                 {
                 	double soulNoise = (SimplexNoise.noise(center_pt.getX()*7, center_pt.getZ()*7)+1)/2;
-                	boolean isTopHexSoul = (soulNoise > (1-Configs.nether.souldHexChance)); //TODO config?
+                	boolean isTopHexSoul = (soulNoise > (1-Configs.nether.souldHexChance)); 
 //                	boolean isTopHexSoul = (soulNoise > 0.86); 
                 	double soulChanceOverlap = 1-(Configs.nether.souldHexChance*0.65);
 //                	boolean isBottomHexSoul = (soulNoise > 0.79 && soulNoise < 0.91);

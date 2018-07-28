@@ -1,3 +1,8 @@
+1.6
+----------
+Fixed Mansions not generating
+Add sunken rim config, making getting out of watery biomes easier (on for ocean, deep ocean, and rivers by default)
+
 1.5
 ----------
 Put a limit on biomes trying to be taller than the world (Alps)

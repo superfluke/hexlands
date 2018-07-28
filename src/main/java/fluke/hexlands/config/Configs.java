@@ -48,7 +48,9 @@ public class Configs {
 		@Config.Comment({"How much lower to adjust ocean and deep ocean biomes", "Default: 16"})
 		@Config.RequiresWorldRestart
 		public int oceanHeight = 16;
-
+		@Config.Comment({"Biomes where the border should be 1 lower (makes getting out of water easier). If empty all biomes borders will be 1 lower", "Default: minecraft:ocean, minecraft:deep_ocean, minecraft:river"})
+		@Config.RequiresWorldRestart
+		public String[] sunkenBiomes = {"minecraft:ocean", "minecraft:deep_ocean", "minecraft:river"};
 		@Config.Comment({"Draw borders around every hex", "Default: false"})
 		@Config.RequiresWorldRestart
 		public boolean outlineAll = false;
@@ -67,6 +69,9 @@ public class Configs {
 		@Config.Comment({"Generate stronghold", "Default: true"})
 		@Config.RequiresWorldRestart
 		public boolean generateStronghold = true;
+		@Config.Comment({"Generate mansions", "Default: true"})
+		@Config.RequiresWorldRestart
+		public boolean generateMansions = true;
 		@Config.Comment({"Generate ocean monuments", "Default: true"})
 		@Config.RequiresWorldRestart
 		public boolean generateMonuments = true;

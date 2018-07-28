@@ -5,6 +5,7 @@ import java.util.Random;
 
 import biomesoplenty.api.biome.BOPBiomes;
 
+import fluke.hexlands.Main;
 import fluke.hexlands.config.Configs;
 import fluke.hexlands.util.SimplexNoise;
 import fluke.hexlands.util.hex.Hex;
@@ -27,6 +28,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biome.SpawnListEntry;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
+import net.minecraft.world.gen.ChunkGeneratorOverworld;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.MapGenBase;
 import net.minecraft.world.gen.MapGenCaves;
@@ -58,13 +60,14 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     private MapGenVillage villageGenerator = new MapGenVillage();
     private MapGenMineshaft mineshaftGenerator = new MapGenMineshaft();
     private MapGenScatteredFeature scatteredFeatureGenerator = new MapGenScatteredFeature();
-    //private MapGenBase ravineGenerator = new MapGenRavine();
-    private MapGenBase ravineGenerator = new HexGenRavine();
+    private MapGenBase ravineGenerator = new MapGenRavine();
+//    private MapGenBase ravineGenerator = new HexGenRavine();
     private StructureOceanMonument oceanMonumentGenerator = new StructureOceanMonument();
     private IBlockState rimBlock;
-    //private WoodlandMansion woodlandMansionGenerator = new WoodlandMansion(this);
+    private WoodlandMansion woodlandMansionGenerator;
     public IBlockState rim2 = Block.getBlockFromName("minecraft:netherrack").getDefaultState();
     public boolean useExtraHexNoise;
+    ArrayList<Biome> sunkenBiomes = new ArrayList<Biome>();
     
     public double[] heightmap;
     public Biome[] biomemap;
@@ -72,6 +75,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     public ChunkGeneratorOverworldHex(final World world)
     {
         updateRimBlock();
+        updateSunkenBiomes();
 
     	{
             caveGenerator = net.minecraftforge.event.terraingen.TerrainGen.getModdedMapGen(caveGenerator, net.minecraftforge.event.terraingen.InitMapGenEvent.EventType.CAVE);
@@ -81,7 +85,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
             scatteredFeatureGenerator = (MapGenScatteredFeature)net.minecraftforge.event.terraingen.TerrainGen.getModdedMapGen(scatteredFeatureGenerator, net.minecraftforge.event.terraingen.InitMapGenEvent.EventType.SCATTERED_FEATURE);
             ravineGenerator = net.minecraftforge.event.terraingen.TerrainGen.getModdedMapGen(ravineGenerator, net.minecraftforge.event.terraingen.InitMapGenEvent.EventType.RAVINE);
             oceanMonumentGenerator = (StructureOceanMonument)net.minecraftforge.event.terraingen.TerrainGen.getModdedMapGen(oceanMonumentGenerator, net.minecraftforge.event.terraingen.InitMapGenEvent.EventType.OCEAN_MONUMENT);
-            //woodlandMansionGenerator = (WoodlandMansion)net.minecraftforge.event.terraingen.TerrainGen.getModdedMapGen(woodlandMansionGenerator, net.minecraftforge.event.terraingen.InitMapGenEvent.EventType.WOODLAND_MANSION);
+            woodlandMansionGenerator = new WoodlandMansion(new TotallyLegitOverworldProvider(world));
         }
     	
         this.world = world;
@@ -140,10 +144,10 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 this.oceanMonumentGenerator.generate(this.world, x, z, chunkprimer);
             }
 
-//            if (this.settings.useMansions)
-//            {
-//                this.woodlandMansionGenerator.generate(this.world, x, z, chunkprimer);
-//            }
+            if (Configs.worldgen.generateMansions) 
+            {
+                this.woodlandMansionGenerator.generate(this.world, x, z, chunkprimer);
+            }
         }
 
         Chunk chunk = new Chunk(this.world, chunkprimer, x, z);
@@ -194,17 +198,17 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 boolean isEdgeBlock = TestEdge.isEdge(new Point(realX, realZ), center_pt, hexy, Configs.worldgen.hexSize, Configs.worldgen.hexSize);
                 boolean isHardEdge = false;
 
-                Biome this_biome = this.biomemap[x + z * 16];                	
-                boolean isWet = this_biome == Biomes.OCEAN || this_biome == Biomes.DEEP_OCEAN;
+                Biome currentBiome = this.biomemap[x + z * 16];                	
+                boolean isWet = currentBiome == Biomes.OCEAN || currentBiome == Biomes.DEEP_OCEAN;
                 
                 
                 
-                float biomeBaseHeightRaw = this_biome.getBaseHeight();
+                float biomeBaseHeightRaw = currentBiome.getBaseHeight();
                 
                 if (biomeBaseHeightRaw > 4.7)
                 	biomeBaseHeightRaw = 4.7F; //Looking at you BoP alps
                 
-                float biomeVariation = this_biome.getHeightVariation();
+                float biomeVariation = currentBiome.getHeightVariation();
                 biomeVariation = biomeVariation * 0.6F + 0.1F;
                 float biomeBaseHeight = (biomeBaseHeightRaw * 16.0F - 1.0F) / 36.0F; //forces range -2 to 2 into -1 to 1
                 biomeBaseHeight = biomeBaseHeight/2 + 0.5F; // into range 0 to 1
@@ -219,15 +223,6 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
             	
                 if (biomeBaseHeightRaw < 0) //put negative values back in their place after that last adjustment
             		biomeBaseHeight *= -1;
-                
-                /*one day ill learn how to debug like a real man... not today
-                if (lastBaseHight != biomeBaseHeight)
-                {
-	                System.out.printf("biome: %s, preb: %f, postb: %f\n", this_biome.getBiomeName(), biomeBaseHeightRaw, biomeBaseHeight);
-                }
-                lastBaseHight = biomeBaseHeight;
-                */
-                
                 
                 
                 //figure out if we need to draw a line between 2 hexes
@@ -354,7 +349,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
 		                	Biome neighbor_biome = this.world.getBiomeProvider().getBiome(new BlockPos(neighbor_origin.getX(), 90, neighbor_origin.getZ()));
 		                	
 		                	//if biomes don't match build a wall
-		                	if(this_biome != neighbor_biome)
+		                	if(currentBiome != neighbor_biome)
 		                	{
 		                		isHardEdge = true;		                		
 		                	}
@@ -376,7 +371,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 	hex_height -= Configs.worldgen.oceanHeight;
                 	block_height = hex_height;
                 }
-                else if(this_biome == Biomes.MESA_CLEAR_ROCK)
+                else if(currentBiome == Biomes.MESA_CLEAR_ROCK)
                 {
                 	this.heightmap[x + z * 16] = Math.round(this.heightmap[x + z * 16] * 16 * 10)/10;
                 }
@@ -421,7 +416,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 {
                 	for (int y = block_height; y < Configs.worldgen.seaLevel; y++)
                 		primer.setBlockState(x, y, z, WATER);
-                	if(isWet || this_biome == Biomes.RIVER)
+                	if(isWet || currentBiome == Biomes.RIVER)
                 		block_height = Configs.worldgen.seaLevel - 1;
                 	else
                 		block_height = Configs.worldgen.seaLevel;
@@ -439,10 +434,26 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
             		primer.setBlockState(x, block_height+1, z, rim2);
             	*/
                 
+
             	if(Configs.worldgen.outlineAll || isHardEdge)
             	{
+            		//lower the rim in some biomes to make getting out of the water easier
+                    int extraRimHeight = 1;
+                    if(sunkenBiomes == null)
+                    {
+                    	extraRimHeight = 0;
+                    }
+                    else
+                    {
+                    	for(Biome b: sunkenBiomes)
+                        {
+                        	if(b == currentBiome)
+                        		extraRimHeight = 0;
+                        }
+                    }
+                    
             		if (isEdgeBlock)
-            			primer.setBlockState(x, block_height+1, z, rimBlock);
+            			primer.setBlockState(x, block_height+extraRimHeight, z, rimBlock);
             	}
             	
              
@@ -509,10 +520,11 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
         		this.scatteredFeatureGenerator.generateStructure(this.world, this.rand, chunkpos);
         	if (Configs.worldgen.generateMonuments)
         		this.oceanMonumentGenerator.generateStructure(this.world, this.rand, chunkpos);
-        	//this.woodlandMansionGenerator.generateStructure(this.world, this.rand, chunkpos);
+        	if (Configs.worldgen.generateMansions)
+        		this.woodlandMansionGenerator.generateStructure(this.world, this.rand, chunkpos); 
         }
 
-        if (Configs.worldgen.lakesGenerate && biome != Biomes.DESERT && biome != Biomes.DESERT_HILLS && !villageHere && this.rand.nextInt(Configs.worldgen.lakeRarity) == 0)
+        if (Configs.worldgen.lakesGenerate && biome != Biomes.DESERT && biome != Biomes.DESERT_HILLS && biome != Biomes.OCEAN && biome != Biomes.DEEP_OCEAN && !villageHere && this.rand.nextInt(Configs.worldgen.lakeRarity) == 0)
         {
 	        if (net.minecraftforge.event.terraingen.TerrainGen.populate(this, this.world, this.rand, x, z, villageHere, net.minecraftforge.event.terraingen.PopulateChunkEvent.Populate.EventType.LAKE))
 	        {
@@ -627,10 +639,10 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
         {
             return this.strongholdGenerator.getNearestStructurePos(worldIn, position, findUnexplored);
         }
-        //else if ("Mansion".equals(structureName) && this.woodlandMansionGenerator != null)
-        //{
-            //return this.woodlandMansionGenerator.getNearestStructurePos(worldIn, position, findUnexplored);
-        //}
+        else if ("Mansion".equals(structureName) && this.woodlandMansionGenerator != null)
+        {
+            return this.woodlandMansionGenerator.getNearestStructurePos(worldIn, position, findUnexplored);
+        }
         else if ("Monument".equals(structureName) && this.oceanMonumentGenerator != null)
         {
             return this.oceanMonumentGenerator.getNearestStructurePos(worldIn, position, findUnexplored);
@@ -664,7 +676,8 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     			this.scatteredFeatureGenerator.generate(this.world, x, z, (ChunkPrimer)null);
     		if (Configs.worldgen.generateMonuments)
     			this.oceanMonumentGenerator.generate(this.world, x, z, (ChunkPrimer)null);
-        	//this.woodlandMansionGenerator.generate(this.world, x, z, (ChunkPrimer)null);
+    		if (Configs.worldgen.generateMansions)
+    			this.woodlandMansionGenerator.generate(this.world, x, z, (ChunkPrimer)null); 
         }
         
     }
@@ -680,10 +693,10 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
         {
             return this.strongholdGenerator.isInsideStructure(pos);
         }
-        //else if ("Mansion".equals(structureName) && this.woodlandMansionGenerator != null)
-        //{
-            //return this.woodlandMansionGenerator.isInsideStructure(pos);
-        //}
+        else if ("Mansion".equals(structureName) && this.woodlandMansionGenerator != null)
+        {
+            return this.woodlandMansionGenerator.isInsideStructure(pos);
+        }
         else if ("Monument".equals(structureName) && this.oceanMonumentGenerator != null)
         {
             return this.oceanMonumentGenerator.isInsideStructure(pos);
@@ -702,7 +715,8 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
         }
     }
 
-    public void updateRimBlock() {
+    public void updateRimBlock() 
+    {
     	String rimblock = Configs.worldgen.rimBlock;
     	if(rimblock.indexOf("@") > 0)
     	{
@@ -713,5 +727,47 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     	{
     		rimBlock = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(rimblock)).getDefaultState();
     	}
+    }
+    
+    public void updateSunkenBiomes()
+    {
+    	if (Configs.worldgen.sunkenBiomes.length == 0)
+    	{
+    		sunkenBiomes = null;
+    		return;
+    	}
+    	
+    	
+    	Biome biome;
+    	
+    	for (String biomeString: Configs.worldgen.sunkenBiomes)
+    	{
+    		biome = Biome.REGISTRY.getObject(new ResourceLocation(biomeString));
+    		if(biome == null)
+    		{
+    			Main.LOGGER.warn("Cannot find biome: " + biomeString);
+    		}
+    		else
+    		{
+    			sunkenBiomes.add(biome);
+    		}
+    	}
+
+//    	for(Biome b: sunkenBiomes)
+//    		System.out.println(b.getBiomeName());
+    }
+
+    private class TotallyLegitOverworldProvider extends ChunkGeneratorOverworld
+    {
+        public TotallyLegitOverworldProvider(World world)
+        {
+            super(world, world.getSeed(), true, "");
+        }
+
+        @Override
+        public void setBlocksInChunk(int x, int z, ChunkPrimer primer)
+        {
+        	ChunkGeneratorOverworldHex.this.generateTerrain(x, z, primer);
+        }
     }
 }
