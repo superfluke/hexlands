@@ -54,6 +54,12 @@ public class Configs {
 		@Config.Comment({"Draw borders around every hex", "Default: false"})
 		@Config.RequiresWorldRestart
 		public boolean outlineAll = false;
+		@Config.Comment({"Draw borders around every  DRY hex (biomes other than ocean/rivers)", "Default: false"})
+		@Config.RequiresWorldRestart
+		public boolean outlineAllDry = false;
+		@Config.Comment({"Used with outlineAllDry setting to specify which biomes are 'wet'", "Default: minecraft:ocean, minecraft:deep_ocean, minecraft:river"})
+		@Config.RequiresWorldRestart
+		public String[] wetBiomes = {"minecraft:ocean", "minecraft:deep_ocean", "minecraft:river"};
 		@Config.Comment({"Master command for generating all vanilla structures: mineshaft, village, stronghold, temples, etc", "Default: true"})
 		@Config.RequiresWorldRestart
 		public boolean generateStructures = true;
@@ -90,15 +96,13 @@ public class Configs {
 		@Config.Comment({"Should lava lakes generate above y=10", "Default: true"})
 		@Config.RequiresWorldRestart
 		public boolean lavaLakesGenerate = true;
-
 		@Config.RequiresWorldRestart
 		@Config.Comment({"What block to use for dividing the grid, use @ for metadata", "Example: minecraft:concrete@6", "Default: minecraft:stonebrick"})
 		public String rimBlock = "minecraft:stonebrick";
+		@Config.Comment({"How much taller than normal should the rim blocks be. Range: -256 to 256", "Default: 0"})
+		@Config.RequiresWorldRestart
+		public int extraRimHeight = 0;
 		
-		//TODO figure out why this doesnt work
-//		@Config.Comment({"Biomes black listed from generating (no ocean plains)", "Example: minecraft:forest", "Default:"})
-//		@Config.RequiresWorldRestart
-//		public String[] biomeBlacklist = {};
 	}
 	
 	public static class ConfigDimension 

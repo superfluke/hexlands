@@ -68,6 +68,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     public IBlockState rim2 = Block.getBlockFromName("minecraft:netherrack").getDefaultState();
     public boolean useExtraHexNoise;
     ArrayList<Biome> sunkenBiomes = new ArrayList<Biome>();
+    ArrayList<Biome> wetBiomes = new ArrayList<Biome>();
     
     public double[] heightmap;
     public Biome[] biomemap;
@@ -76,6 +77,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     {
         updateRimBlock();
         updateSunkenBiomes();
+        updateWetBiomes();
 
     	{
             caveGenerator = net.minecraftforge.event.terraingen.TerrainGen.getModdedMapGen(caveGenerator, net.minecraftforge.event.terraingen.InitMapGenEvent.EventType.CAVE);
@@ -201,6 +203,21 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 Biome currentBiome = this.biomemap[x + z * 16];                	
                 boolean isWet = currentBiome == Biomes.OCEAN || currentBiome == Biomes.DEEP_OCEAN;
                 
+                boolean isDry = true; // only used for outline all dry setting, might not equal !isWet depending on user settings
+                if(Configs.worldgen.outlineAllDry)
+                {
+	                if(Configs.worldgen.wetBiomes != null)
+	                {
+	                	for(Biome b: wetBiomes)
+	                    {
+	                    	if(b == currentBiome)
+	                    	{
+	                    		isDry = false;
+	                    		break;
+	                    	}
+	                    }
+	                }
+                }
                 
                 
                 float biomeBaseHeightRaw = currentBiome.getBaseHeight();
@@ -226,7 +243,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 
                 
                 //figure out if we need to draw a line between 2 hexes
-                if(!isWet && !Configs.worldgen.outlineAll)
+                if(!isWet && !Configs.worldgen.outlineAll && !Configs.worldgen.outlineAllDry)
             	{
 	                if (isEdgeBlock)
 	                {	                	
@@ -376,7 +393,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 	this.heightmap[x + z * 16] = Math.round(this.heightmap[x + z * 16] * 16 * 10)/10;
                 }
                 
-                if(Configs.worldgen.outlineAll)
+                if(Configs.worldgen.outlineAll || (Configs.worldgen.outlineAllDry && isDry))
                 {
                 	isHardEdge = isEdgeBlock;
                 }
@@ -395,7 +412,10 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 	
                 	//smooth out where the terrain wants to be with the height of the hex rim based on distance from center of hex
                 	block_height = (int)Math.round((block_desired_height*(1-distance_ratio) + hex_height*distance_ratio));
-                
+                }
+                else
+                {
+                	block_height += Configs.worldgen.extraRimHeight;
                 }
 
                 if(block_height>255)
@@ -435,7 +455,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
             	*/
                 
 
-            	if(Configs.worldgen.outlineAll || isHardEdge)
+            	if(Configs.worldgen.outlineAll || isHardEdge || (Configs.worldgen.outlineAllDry && isDry))
             	{
             		//lower the rim in some biomes to make getting out of the water easier
                     int extraRimHeight = 1;
@@ -752,9 +772,31 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     			sunkenBiomes.add(biome);
     		}
     	}
-
-//    	for(Biome b: sunkenBiomes)
-//    		System.out.println(b.getBiomeName());
+    }
+    
+    public void updateWetBiomes()
+    {
+    	if (Configs.worldgen.wetBiomes.length == 0)
+    	{
+    		wetBiomes = null;
+    		return;
+    	}
+    	
+    	
+    	Biome biome;
+    	
+    	for (String biomeString: Configs.worldgen.wetBiomes)
+    	{
+    		biome = Biome.REGISTRY.getObject(new ResourceLocation(biomeString));
+    		if(biome == null)
+    		{
+    			Main.LOGGER.warn("Cannot find biome: " + biomeString);
+    		}
+    		else
+    		{
+    			wetBiomes.add(biome);
+    		}
+    	}
     }
 
     private class TotallyLegitOverworldProvider extends ChunkGeneratorOverworld

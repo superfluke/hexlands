@@ -23,7 +23,6 @@ import fluke.hexlands.world.WorldProviderHex;
 import fluke.hexlands.world.WorldTypeATest;
 import fluke.hexlands.world.WorldTypeBoPHex;
 import fluke.hexlands.world.WorldTypeHexlands;
-//import fluke.hexlands.world.BiomeEditor;
 
 @Mod(modid = Reference.MOD_ID, name = Reference.NAME, version = Reference.VERSION, acceptableRemoteVersions="*")
 public class Main 
@@ -64,7 +63,6 @@ public class Main
 	@EventHandler
 	public static void PostInit(FMLPostInitializationEvent event)
 	{
-		//BiomeEditor.removeBlacklistBiomes(); bleh TODO or something
 	}
 	
 	@EventHandler
