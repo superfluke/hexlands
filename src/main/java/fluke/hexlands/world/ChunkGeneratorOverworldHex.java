@@ -51,17 +51,13 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     Biome[] biomesForGeneration;
     protected static final IBlockState WATER = Blocks.WATER.getDefaultState();
     protected static final IBlockState STONE = Blocks.STONE.getDefaultState();
-    
-
     protected Layout hex_layout = new Layout(Layout.flat, new Point(Configs.worldgen.hexSize, Configs.worldgen.hexSize), new Point(0, 0));
-
     private MapGenBase caveGenerator = new MapGenCaves();
     private MapGenStronghold strongholdGenerator = new MapGenStronghold();
     private MapGenVillage villageGenerator = new MapGenVillage();
     private MapGenMineshaft mineshaftGenerator = new MapGenMineshaft();
     private MapGenScatteredFeature scatteredFeatureGenerator = new MapGenScatteredFeature();
     private MapGenBase ravineGenerator = new MapGenRavine();
-//    private MapGenBase ravineGenerator = new HexGenRavine();
     private StructureOceanMonument oceanMonumentGenerator = new StructureOceanMonument();
     private IBlockState rimBlock;
     private WoodlandMansion woodlandMansionGenerator;
@@ -69,9 +65,9 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     public boolean useExtraHexNoise;
     ArrayList<Biome> sunkenBiomes = new ArrayList<Biome>();
     ArrayList<Biome> wetBiomes = new ArrayList<Biome>();
-    
     public double[] heightmap;
     public Biome[] biomemap;
+    private int sealevel;
     
     public ChunkGeneratorOverworldHex(final World world)
     {
@@ -92,6 +88,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     	
         this.world = world;
         world.setSeaLevel(Configs.worldgen.seaLevel);
+        sealevel = Configs.worldgen.seaLevel-1;
         this.rand = new Random(world.getSeed());
         heightmap = new double[256];
         biomemap = new Biome[256];
@@ -432,14 +429,12 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
 						primer.setBlockState(x, y, z, STONE);
                 }
                 
-                if (block_height < Configs.worldgen.seaLevel)
+                if (block_height < sealevel)
                 {
-                	for (int y = block_height; y < Configs.worldgen.seaLevel; y++)
+                	for (int y = block_height; y <= sealevel; y++)
                 		primer.setBlockState(x, y, z, WATER);
-                	if(isWet || currentBiome == Biomes.RIVER)
-                		block_height = Configs.worldgen.seaLevel - 1;
-                	else
-                		block_height = Configs.worldgen.seaLevel;
+                	
+                	block_height = sealevel;
                 }
                 else
                 {
