@@ -194,7 +194,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 //convert hex cords back to x,z to get center point
                 Point center_pt =  hex_layout.hexToPixel(hexy);
 
-                boolean isEdgeBlock = TestEdge.isEdge(new Point(realX, realZ), center_pt, hexy, Configs.worldgen.hexSize, Configs.worldgen.hexSize);
+                boolean isEdgeBlock = TestEdge.isEdge(new Point(realX, realZ), center_pt, hexy, Configs.worldgen.hexSize, Configs.worldgen.hexSize, Configs.worldgen.rimSize);
                 boolean isHardEdge = false;
 
                 Biome currentBiome = this.biomemap[x + z * 16];                	
@@ -254,7 +254,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
 	                		int pretestZ = realZ - center_pt.getZ();
 	                		int testZ = realZ - center_pt.getZ();
 	                		int testX = realX - center_pt.getX();
-	                		int boundry_size = 3; 
+	                		int boundry_size = Configs.worldgen.rimSize; 
 	                		boolean zPositive = true;
 	                		if (testZ <= 0)
 	                		{
@@ -429,10 +429,20 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
 						primer.setBlockState(x, y, z, STONE);
                 }
                 
+                //fill in blocks below sea level with water
                 if (block_height < sealevel)
                 {
-                	for (int y = block_height; y <= sealevel; y++)
-                		primer.setBlockState(x, y, z, WATER);
+                	//or use rim block if using borderToBedrock option
+                	if(Configs.worldgen.borderToBedrock && isHardEdge)
+                	{
+                		for (int y = block_height; y <= sealevel; y++)
+                    		primer.setBlockState(x, y, z, rimBlock);
+                	}
+                	else
+                	{
+	                	for (int y = block_height; y <= sealevel; y++)
+	                		primer.setBlockState(x, y, z, WATER);
+                	}
                 	
                 	block_height = sealevel;
                 }

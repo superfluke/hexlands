@@ -140,7 +140,7 @@ public class ChunkGeneratorHellHex implements IChunkGenerator
                     double midlandTerrainNoise = terrainNoise*0.8 + 0.5*roofNoise + 0.5*roofNoiser;
                     double midlandRoofNoise = Math.abs(roofNoise*0.8 + 0.5*terrainNoise + 0.5*terrainNoiser);
                     
-                    boolean isEdgeBlock = TestEdge.isEdge(new Point(realX, realZ), center_pt, hexy, Configs.worldgen.hexSize, Configs.worldgen.hexSize);
+                    boolean isEdgeBlock = TestEdge.isEdge(new Point(realX, realZ), center_pt, hexy, Configs.worldgen.hexSize, Configs.worldgen.hexSize, Configs.nether.netherRimSize);
                     
                     //y level of lower hex before we adjust for terrain noise 
                     hexHeight += (hexNoise*26);

@@ -102,6 +102,9 @@ public class Configs {
 		@Config.Comment({"How much taller than normal should the rim blocks be. Range: -256 to 256", "Default: 0"})
 		@Config.RequiresWorldRestart
 		public int extraRimHeight = 0;
+		@Config.Comment({"Controls how thick the hex border is. Works better with odd numbers", "Default: 3"})
+		@Config.RequiresWorldRestart
+		public int rimSize = 3;
 		
 	}
 	
@@ -148,6 +151,10 @@ public class Configs {
 		@Config.Comment({"Sea level for nether lava", "Default: 31"})
 		@Config.RequiresWorldRestart
 		public int netherSeaLevel = 31;
+		
+		@Config.Comment({"Controls how thick the hex border is. Works better with odd numbers", "Default: 3"})
+		@Config.RequiresWorldRestart
+		public int netherRimSize = 3;
 	
 	}
 
