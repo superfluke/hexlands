@@ -3,7 +3,6 @@ package fluke.hexlands.proxy;
 import fluke.hexlands.HexServer;
 import fluke.hexlands.config.Configs;
 import fluke.hexlands.world.WorldProviderHexHell;
-import net.minecraft.item.Item;
 import net.minecraft.world.DimensionType;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;

@@ -5,27 +5,20 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-import biomesoplenty.common.biome.BOPBiome;
-import biomesoplenty.common.biome.nether.BOPHellBiome;
-
 import fluke.hexlands.config.Configs;
 import fluke.hexlands.util.SimplexNoise;
 import fluke.hexlands.util.hex.Hex;
 import fluke.hexlands.util.hex.Layout;
 import fluke.hexlands.util.hex.Point;
 import fluke.hexlands.util.hex.TestEdge;
-
 import net.minecraft.block.BlockFalling;
-import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.block.state.pattern.BlockMatcher;
 import net.minecraft.entity.EnumCreatureType;
-import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
@@ -33,7 +26,6 @@ import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.gen.MapGenBase;
 import net.minecraft.world.gen.MapGenCavesHell;
-import net.minecraft.world.gen.NoiseGeneratorOctaves;
 import net.minecraft.world.gen.feature.WorldGenBush;
 import net.minecraft.world.gen.feature.WorldGenFire;
 import net.minecraft.world.gen.feature.WorldGenGlowStone1;

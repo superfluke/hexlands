@@ -3,6 +3,13 @@ package fluke.hexlands;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import fluke.hexlands.config.Configs;
+import fluke.hexlands.proxy.CommonProxy;
+import fluke.hexlands.util.Reference;
+import fluke.hexlands.world.WorldProviderHex;
+import fluke.hexlands.world.WorldTypeATest;
+import fluke.hexlands.world.WorldTypeBoPHex;
+import fluke.hexlands.world.WorldTypeHexlands;
 import net.minecraft.world.DimensionType;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.fml.common.Loader;
@@ -14,15 +21,6 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
-import fluke.hexlands.command.DebugBiome;
-import fluke.hexlands.command.SomeOtherShittyDebugCommand;
-import fluke.hexlands.config.Configs;
-import fluke.hexlands.proxy.CommonProxy;
-import fluke.hexlands.util.Reference;
-import fluke.hexlands.world.WorldProviderHex;
-import fluke.hexlands.world.WorldTypeATest;
-import fluke.hexlands.world.WorldTypeBoPHex;
-import fluke.hexlands.world.WorldTypeHexlands;
 
 @Mod(modid = Reference.MOD_ID, name = Reference.NAME, version = Reference.VERSION, acceptableRemoteVersions="*")
 public class Main 
@@ -69,7 +67,6 @@ public class Main
 	public void startServer(FMLServerStartingEvent event) 
 	{
 		//event.registerServerCommand(new DebugBiome()); //TODO delete
-		//event.registerServerCommand(new SomeOtherShittyDebugCommand());
 	}
 	
 	@Mod.EventHandler

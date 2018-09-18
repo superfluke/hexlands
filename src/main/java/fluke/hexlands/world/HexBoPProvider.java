@@ -1,15 +1,14 @@
 package fluke.hexlands.world;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+
 import javax.annotation.Nullable;
 
 import biomesoplenty.api.generation.Generators;
 import biomesoplenty.common.world.BOPWorldSettings;
 import biomesoplenty.common.world.BiomeProviderBOP;
 import biomesoplenty.common.world.WorldTypeBOP;
-
 import fluke.hexlands.config.Configs;
 import fluke.hexlands.util.hex.Hex;
 import fluke.hexlands.util.hex.Layout;
@@ -19,10 +18,8 @@ import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.init.Biomes;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeCache;
-import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.gen.layer.GenLayer;
 import net.minecraft.world.gen.layer.IntCache;
 import net.minecraft.world.storage.WorldInfo;

@@ -1,9 +1,8 @@
 package fluke.hexlands.world;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-
-import biomesoplenty.api.biome.BOPBiomes;
 
 import fluke.hexlands.Main;
 import fluke.hexlands.config.Configs;
@@ -12,7 +11,6 @@ import fluke.hexlands.util.hex.Hex;
 import fluke.hexlands.util.hex.Layout;
 import fluke.hexlands.util.hex.Point;
 import fluke.hexlands.util.hex.TestEdge;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFalling;
 import net.minecraft.block.state.IBlockState;
@@ -41,7 +39,6 @@ import net.minecraft.world.gen.structure.MapGenStronghold;
 import net.minecraft.world.gen.structure.MapGenVillage;
 import net.minecraft.world.gen.structure.StructureOceanMonument;
 import net.minecraft.world.gen.structure.WoodlandMansion;
-import net.minecraftforge.fml.client.config.ConfigGuiType;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 public class ChunkGeneratorOverworldHex implements IChunkGenerator
@@ -198,23 +195,20 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 boolean isHardEdge = false;
 
                 Biome currentBiome = this.biomemap[x + z * 16];                	
-                boolean isWet = currentBiome == Biomes.OCEAN || currentBiome == Biomes.DEEP_OCEAN;
                 
-                boolean isDry = true; // only used for outline all dry setting, might not equal !isWet depending on user settings
-                if(Configs.worldgen.outlineAllDry)
+                boolean isWet = false; // used for outline all dry setting and lowering ocean type biomes height
+                if(Configs.worldgen.wetBiomes != null)
                 {
-	                if(Configs.worldgen.wetBiomes != null)
-	                {
-	                	for(Biome b: wetBiomes)
-	                    {
-	                    	if(b == currentBiome)
-	                    	{
-	                    		isDry = false;
-	                    		break;
-	                    	}
-	                    }
-	                }
+                	for(Biome b: wetBiomes)
+                    {
+                    	if(b == currentBiome)
+                    	{
+                    		isWet = true;
+                    		break;
+                    	}
+                    }
                 }
+                
                 
                 
                 float biomeBaseHeightRaw = currentBiome.getBaseHeight();
@@ -390,7 +384,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
                 	this.heightmap[x + z * 16] = Math.round(this.heightmap[x + z * 16] * 16 * 10)/10;
                 }
                 
-                if(Configs.worldgen.outlineAll || (Configs.worldgen.outlineAllDry && isDry))
+                if(Configs.worldgen.outlineAll || (Configs.worldgen.outlineAllDry && !isWet))
                 {
                 	isHardEdge = isEdgeBlock;
                 }
@@ -460,7 +454,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
             	*/
                 
 
-            	if(Configs.worldgen.outlineAll || isHardEdge || (Configs.worldgen.outlineAllDry && isDry))
+            	if(Configs.worldgen.outlineAll || isHardEdge || (Configs.worldgen.outlineAllDry && !isWet))
             	{
             		//lower the rim in some biomes to make getting out of the water easier
                     int extraRimHeight = 1;

@@ -1,7 +1,6 @@
 package fluke.hexlands.config;
 
 import fluke.hexlands.util.Reference;
-
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
@@ -54,12 +53,12 @@ public class Configs {
 		@Config.Comment({"Draw borders around every hex", "Default: false"})
 		@Config.RequiresWorldRestart
 		public boolean outlineAll = false;
-		@Config.Comment({"Draw borders around every  DRY hex (biomes other than ocean/rivers)", "Default: false"})
+		@Config.Comment({"Draw borders around every  DRY hex (biomes other than those listed in wetBiomes)", "Default: false"})
 		@Config.RequiresWorldRestart
 		public boolean outlineAllDry = false;
-		@Config.Comment({"Used with outlineAllDry setting to specify which biomes are 'wet'", "Default: minecraft:ocean, minecraft:deep_ocean, minecraft:river"})
+		@Config.Comment({"Defines which biomes are ocean types. Used by oceanHeight and outlineAllDry config settings", "Default: minecraft:ocean, minecraft:deep_ocean, biomesoplenty:kelp_forest, biomesoplenty:coral_reef"})
 		@Config.RequiresWorldRestart
-		public String[] wetBiomes = {"minecraft:ocean", "minecraft:deep_ocean", "minecraft:river"};
+		public String[] wetBiomes = {"minecraft:ocean", "minecraft:deep_ocean", "biomesoplenty:kelp_forest", "biomesoplenty:coral_reef"};
 		@Config.Comment({"Master command for generating all vanilla structures: mineshaft, village, stronghold, temples, etc", "Default: true"})
 		@Config.RequiresWorldRestart
 		public boolean generateStructures = true;
