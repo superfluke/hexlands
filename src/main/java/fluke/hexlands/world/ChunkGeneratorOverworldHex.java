@@ -65,6 +65,7 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
     public double[] heightmap;
     public Biome[] biomemap;
     private int sealevel;
+    private boolean hexIslands = true; //TODO config
     
     public ChunkGeneratorOverworldHex(final World world)
     {
@@ -486,7 +487,10 @@ public class ChunkGeneratorOverworldHex implements IChunkGenerator
 		{
 			for(int z=0; z<16; z++)
 			{
-				this.biomemap[x + z * 16] = this.world.getBiomeProvider().getBiome(new BlockPos(startX+x, 0, startZ+z));
+				if(hexIslands)
+					this.biomemap[x + z * 16] = ((HexBiomeProvider) this.world.getBiomeProvider()).getHexIslandBiome(new BlockPos(startX+x, 0, startZ+z));
+				else
+					this.biomemap[x + z * 16] = this.world.getBiomeProvider().getBiome(new BlockPos(startX+x, 0, startZ+z));
 			}
 		}
 		

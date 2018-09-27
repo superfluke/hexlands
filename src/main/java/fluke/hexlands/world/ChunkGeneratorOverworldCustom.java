@@ -22,6 +22,7 @@ import net.minecraft.world.gen.NoiseGeneratorOctaves;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 import net.minecraftforge.event.terraingen.InitNoiseGensEvent.ContextOverworld;
 
+//just a class for random tests
 public class ChunkGeneratorOverworldCustom implements IChunkGenerator
 {
     final Random rand = new Random();

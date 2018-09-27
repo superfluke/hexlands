@@ -32,6 +32,8 @@ public class HexBiomeProvider extends BiomeProvider
     private GenLayer biomeIndexLayer;
     /** The biome list. */
     private final BiomeCache biomeCache;
+    private Random rand;
+    private long worldSeed;
     
     public HexBiomeProvider(long seed, WorldType worldTypeIn)
     {
@@ -41,6 +43,8 @@ public class HexBiomeProvider extends BiomeProvider
         agenlayer = getModdedBiomeGenerators(worldTypeIn, seed, agenlayer);
         this.genBiomes = agenlayer[0];
         this.biomeIndexLayer = agenlayer[1];
+        rand = new Random(seed);
+        worldSeed = seed;
     }
     
     public HexBiomeProvider(WorldInfo info)
@@ -62,6 +66,48 @@ public class HexBiomeProvider extends BiomeProvider
         Point center_pt =  hex_layout.hexToPixel(hexy);
         return this.biomeCache.getBiome(center_pt.getX(), center_pt.getZ(), defaultBiome);
     }
+    
+    public Biome getHexIslandBiome(BlockPos pos)
+    {
+    	//convert x,z to a hex cords (q,r)
+//        Hex hexy = hex_layout.pixelToHex(new Point(pos.getX(), pos.getZ())).hexRound();
+////        int q = (int) Math.round(hexy.q/3.0);
+////        int r = (int) Math.round(hexy.r/3.0);
+//        int q = hexy.q;
+//        int r = hexy.r;
+//        if (q%3 != 0)
+//        	q = q+1%3==0? q+1: q-1;
+//        if (r%3 != 0)
+//        	r = r+1%3==0? r+1: r-1;
+//        
+//        Point islandCenter = hex_layout.hexToPixel(new Hex(q, r));
+        
+    	if(isIsland(pos))
+    		return getBiome(pos, (Biome)null);
+//    		return getBiome(new BlockPos(islandCenter.getX(), 0, islandCenter.getZ()), (Biome)null);
+    	else
+    		return Biomes.OCEAN;
+    }
+    
+    public boolean isIsland(BlockPos pos) 
+    {
+    	//convert x,z to a hex cords (q,r)
+        Hex hexy = hex_layout.pixelToHex(new Point(pos.getX(), pos.getZ())).hexRound();
+        int q = (int) Math.round(hexy.q/3.0);
+        int r = (int) Math.round(hexy.r/3.0);
+//        int q = hexy.q; //lol nope
+//        int r = hexy.r;
+//        if (q%3 != 0)
+//        	q = q+1%3==0? q+1: q-1;
+//        if (r%3 != 0)
+//        	r = r+1%3==0? r+1: r-1;
+    	
+        rand.setSeed(worldSeed + (long)(q * q * 8008135) + (long)(r * r *6980085) ^ 133780085L);
+    	if(rand.nextInt(4) == 0)
+    		return true;
+    	
+    	return false;
+    }
 
     /**
      * Returns an array of biomes for the location input.
@@ -79,7 +125,7 @@ public class HexBiomeProvider extends BiomeProvider
 
         try
         {
-        	Hex prev_hex = hex_layout.pixelToHex(new Point(chunkX-1000, chunkZ-1000)).hexRound();
+        	Hex prev_hex = null;//hex_layout.pixelToHex(new Point(chunkX-1000, chunkZ-1000)).hexRound();
         	Biome prev_biome = Biomes.DEFAULT;
             for (int i = 0; i < width * height; ++i)
             {
@@ -87,9 +133,13 @@ public class HexBiomeProvider extends BiomeProvider
             	int realZ = (int)(i/height)+chunkZ;
             	Hex hexy = hex_layout.pixelToHex(new Point(realX, realZ)).hexRound();
             	
-            	if (hexy.q != prev_hex.q || hexy.r != prev_hex.r)
+            	if (prev_hex != null && hexy.q != prev_hex.q || hexy.r != prev_hex.r)
             	{
-            		prev_biome = Biome.getBiome(this.biomeIndexLayer.getInts(hexy.q*Configs.worldgen.biomeSize, hexy.r*Configs.worldgen.biomeSize, 1, 1)[0], Biomes.DEFAULT);
+            		if(isIsland(new BlockPos(realX, 0, realZ)))
+            			prev_biome = Biome.getBiome(this.biomeIndexLayer.getInts(hexy.q*Configs.worldgen.biomeSize, hexy.r*Configs.worldgen.biomeSize, 1, 1)[0], Biomes.DEFAULT);
+            		else
+            			prev_biome = Biomes.OCEAN;
+            		
             		prev_hex = hexy;
             	}
             	
@@ -154,7 +204,10 @@ public class HexBiomeProvider extends BiomeProvider
             	//if this hex has different cords from the last hex
             	if (hexy.q != prev_hex.q || hexy.r != prev_hex.r)
             	{	//get a new biome based on current hex cords
-            		prev_biome = Biome.getBiome(this.biomeIndexLayer.getInts(hexy.q*Configs.worldgen.biomeSize, hexy.r*Configs.worldgen.biomeSize, 1, 1)[0], Biomes.DEFAULT);
+            		if(isIsland(new BlockPos(realX, 0, realZ)))
+            			prev_biome = Biome.getBiome(this.biomeIndexLayer.getInts(hexy.q*Configs.worldgen.biomeSize, hexy.r*Configs.worldgen.biomeSize, 1, 1)[0], Biomes.DEFAULT);
+            		else
+            			prev_biome = Biomes.OCEAN;
             		prev_hex = hexy;
             	}
             	
