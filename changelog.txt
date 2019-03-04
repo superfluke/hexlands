@@ -1,3 +1,27 @@
+1.9.0
+----------
+Added separate world time for Hex Lands dimension (fixes sleeping not passing time)
+
+1.8.1
+----------
+Allowed for ocean biomes to be set by the "wetBiomes" config option
+    Note: if upgrading from older version delete "minecraft:river" from the wetBiomes config option 
+    
+1.8.0
+----------
+Add config option for rim thickness
+Fixed borderToBedrock config not working in ocean biomes 
+
+1.7.1
+----------
+Fixed rim blocks floating 1 block above water level
+
+
+1.7.0
+----------
+Added config for extending walls vertically
+Added config for outlining only 'dry' biomes
+
 1.6
 ----------
 Fixed Mansions not generating
